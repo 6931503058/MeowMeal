@@ -53,3 +53,10 @@ To run tests, run the following command
 **Skill:** Javascrip, CSS, HTML
 
 รอแก้...
+
+## Project Structure
+
+- 'docs/' : System requirements and test cases
+- 'prototype/' : UI design screenshorts and Figma Prototype link
+- 'mi_experiments/' : AI model training, dataset samples, and experiment reports
+- 'backend_logic/' : Core business logic (5-consecutive-day anomaly detection) and mock datasets
