@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FR-4: Recovery Trend Dashboard</title>
+    <!-- เรียกใช้งาน Chart.js ผ่าน CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            padding: 20px;
+            display: flex;
+            justify-content: center; 
+        }
+        .dashboard-card {
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 900px;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 8px;
+        }
+        p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-card">
+        <h2>FR-4: Recovery Trend Dashboard</h2>
+        <p>กราฟแสดงประวัติการกินอาหาร 30 วันสำหรับสัตวแพทย์</p>
+        
+        <!-- พื้นที่สำหรับวาดกราฟ -->
+        <canvas id="recoveryChart"></canvas>
+    </div>
+
+    <!-- เชื่อมต่อกับไฟล์ JavaScript -->
+    <script src="dashboard.js"></script>
+</body>
+</html>
