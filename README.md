@@ -50,8 +50,6 @@ To run tests, run the following command
 
 ## Tech Stack
 
-**Skill:** javascrip, c#, TailwindCSS
-
-**Server:** Node, Express
+**Skill:** Javascrip, CSS, HTML
 
 รอแก้...
