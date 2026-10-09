@@ -1,5 +1,18 @@
 ## MeowMeal
 Feline Food Intake &amp; Early Anomaly Monitoring System
+## Introduction
+Cats naturally conceal signs of illness, and subtle appetite loss often goes unnoticed until 
+acute complications like hepatic lipidosis occur. Post-operative and chronically ill felines 
+require strict nutritional compliance, but irregular wet-diet leftovers make home monitoring 
+difficult. MeowMeal is a feline clinical monitoring system designed to track recovery intake 
+against prescribed targets, flag consecutive consumption drops, and visualize 30-day 
+feeding trends for veterinary consultations. The MVP is deliberately small: four core stories 
+(create/edit clinical cat profile, log recovery meal intake manually, trigger early anomaly 
+alerts, and view historical trend graphs) plus one AI-assisted convenience feature (estimate 
+remaining mushy/wet prescription portions via photo upload). Success looks like this: an 
+owner detects an appetite decline early and seeks veterinary care before severe medical 
+deterioration occurs.
+
 ## Problem Statement (Clinical Focus)
 
 - **What the problem is:** Post-op & chronically ill cats require strict nutritional compliance to prevent fatal relapses or hepatic lipidosis. 
