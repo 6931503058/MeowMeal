@@ -70,7 +70,7 @@ Click **Sample data** to see the alert and chart immediately.
 | Name | ID | Role |
 | --- | --- | --------|
 | Khwanhathai Phoemsuk |6931503025| README.md
-| Parewa Yawram |6931503058 | App Shell & Navigation
+| Parewa Yawram |6931503058 | App Shell & Navigation (Home + FR-3 : Early Anomaly Alert)
 |Pattarawat nutsa | 6931503060 | FR-4: Recovery Trend Dashboard
 | Puree Suesat | 6931503062 | FR-1 & FR-2: Profile & Manual Log UI
 | Korawit phaichitkunchon | 6931503099 |FR-5: AI Portion Screen & Fallback Flow
