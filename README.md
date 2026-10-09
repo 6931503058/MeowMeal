@@ -51,8 +51,8 @@ Click **Sample data** to see the alert and chart immediately.
 
 
 ## Project Document
-- [M1 Team Charter](https://drive.google.com/file/d/1BN0T683GlNzGHjN9GKIk_If5k1FUJEnk/view?usp=drive_link)
-- [M2 Software Requirements Specification](https://drive.google.com/file/d/1HvYE0niH5jl0mLq1rcOxuX-44xeZwNSX/view?usp=drive_link)
+- [M1 Team Charter]([https://drive.google.com/file/d/1BN0T683GlNzGHjN9GKIk_If5k1FUJEnk/view?usp=drive_link](https://drive.google.com/file/d/1BN0T683GlNzGHjN9GKIk_If5k1FUJEnk/view?usp=sharing))
+- [M2 Software Requirements Specification]([https://drive.google.com/file/d/1HvYE0niH5jl0mLq1rcOxuX-44xeZwNSX/view?usp=drive_link](https://drive.google.com/file/d/1HvYE0niH5jl0mLq1rcOxuX-44xeZwNSX/view?usp=sharing))
 ## Member
 | Name | ID | Role |
 | --- | --- | --------|
