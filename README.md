@@ -51,7 +51,7 @@ JavaScript, CSS, HTML
 git clone https://github.com/6931503058/MeowMeal.git
 cd MeowMeal
 ```
-Then open `meowmeal.html` in a browser. No installation needed.
+Then open `index.html` in a browser. No installation needed.
 Click **Sample data** to see the alert and chart immediately.
 ## Features
 
