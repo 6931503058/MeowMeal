@@ -1,4 +1,4 @@
-# MeowMeal
+## MeowMeal
 Feline Food Intake &amp; Early Anomaly Monitoring System
 ## Problem Statement (Clinical Focus)
 
@@ -8,17 +8,38 @@ Irregular wet-diet leftovers make home tracking difficult, leaving vet checkups 
 - **Who faces this:** Cat Owner, Post-op/chronic feline caregivers and attending veterinarians.
 
 - **Why it matters:** Prolonged underfeeding triggers organ failure, emergency re-hospitalization, and lost diagnostic time.
+
+## Demo
+- Web: _(add your GitHub Pages link here)_
+- Screenshots: _(add images to `docs/screenshots/` and link them here)_
+
+
 ## Core Feature (5 FRs)
 
-| FR | Feature |
-|----|---------|
-| FR-1 |  Add / Edit Clinical Cat Profile |
-| FR-2 | Log Recovery Meal Intake Manually |
-| FR-3 | Early Anomaly Alert (Golden Thread) |
-| FR-4 | Historical Recovery Trend View |
-| FR-5 | Visual Portion Estimation (AI)|
+| FR | Feature | Detail |
+|----|---------|----------------|
+| FR-1 | Cat Profile | Add/edit name, age, weight, diagnosis context, and daily intake target, with input validation
+| FR-2 | Manual meal logging | Food-remaining buttons (0/25/50/75/100%), prescription diet tag, and an "extra snack" flag excluded from alerts
+| FR-3 | Early Anomaly Alert (Golden Thread) | Intake below target for 5 consecutive days triggers a high-priority alert recommending a vet visit; the counter resets after a normal day
+| FR-4 | 30-day trend chart | Daily intake bar chart; shows "No logs available" when empty
+| FR-5 | Visual Portion Estimation (AI)| Upload a bowl photo for an editable suggested percentage; below 60% confidence it asks for manual selection
+## Out of scope
+Water intake, stool/urine/litter box analysis, behavioral video tracking, physical symptom detection,
+other species, automated diagnosis or prescription.
+## Tech Stack
+
+JavaScript, CSS, HTML
 
 
+
+## Running Tests
+
+```bash
+git clone https://github.com/6931503058/MeowMeal.git
+cd MeowMeal
+```
+Then open `meowmeal.html` in a browser. No installation needed.
+Click **Sample data** to see the alert and chart immediately.
 ## Features
 
 - Home
@@ -29,34 +50,21 @@ Irregular wet-diet leftovers make home tracking difficult, leaving vet checkups 
 - AI portion estimate
 
 
-## Running Tests
-
-To run tests, run the following command
-
-```bash
-  npm run test ต้องใช้อันนี้ไหม...
-```
-
-
+## Project Document
+- [M1 Team Charter](file:///C:/Users/ADMIN/Downloads/15031001%20Introduction%20to%20Software%20Engineering/M1-Charter_I%20don%E2%80%99t%20know.pdf)
+- [M2 Software Requirements Specification](file:///C:/Users/ADMIN/Downloads/15031001%20Introduction%20to%20Software%20Engineering/Team15_M2_SRS.pdf)
 ## Member
 | Name | ID | Role |
 | --- | --- | --------|
-| Khwanhathai Phoemsuk |6931503025| something
+| Khwanhathai Phoemsuk |6931503025| README.md
 | Parewa Yawram |6931503058 | App Shell & Navigation
 |Pattarawat nutsa | 6931503060 | FR-4: Recovery Trend Dashboard
 | Puree Suesat | 6931503062 | FR-1 & FR-2: Profile & Manual Log UI
 | Korawit phaichitkunchon | 6931503099 |FR-5: AI Portion Screen & Fallback Flow
 
 
-## Tech Stack
-
-**Skill:** Javascrip, CSS, HTML
-
-รอแก้...
-
-## Project Structure
-
-- 'docs/' : System requirements and test cases
-- 'prototype/' : UI design screenshorts and Figma Prototype link
-- 'mi_experiments/' : AI model training, dataset samples, and experiment reports
-- 'backend_logic/' : Core business logic (5-consecutive-day anomaly detection) and mock datasets
+## Team
+Team **I don't know** · Introduction to Software Engineering (15031001)
+## Disclaimer 
+MeowMeal is not a diagnostic tool and does not replace a veterinary exam.
+If your cat shows abnormal symptoms, please consult a veterinarian.
