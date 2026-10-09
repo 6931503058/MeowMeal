@@ -51,8 +51,8 @@ Click **Sample data** to see the alert and chart immediately.
 
 
 ## Project Document
-- [M1 Team Charter](file:///C:/Users/ADMIN/Downloads/15031001%20Introduction%20to%20Software%20Engineering/M1-Charter_I%20don%E2%80%99t%20know.pdf)
-- [M2 Software Requirements Specification](file:///C:/Users/ADMIN/Downloads/15031001%20Introduction%20to%20Software%20Engineering/Team15_M2_SRS.pdf)
+- [M1 Team Charter](https://drive.google.com/file/d/1BN0T683GlNzGHjN9GKIk_If5k1FUJEnk/view?usp=drive_link)
+- [M2 Software Requirements Specification](https://drive.google.com/file/d/1HvYE0niH5jl0mLq1rcOxuX-44xeZwNSX/view?usp=drive_link)
 ## Member
 | Name | ID | Role |
 | --- | --- | --------|
