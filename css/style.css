@@ -1,0 +1,21 @@
+/* --- ส่วนของ FR-4 Dashboard (Pattarawat) --- */
+.dashboard-card {
+  background: #ffffff;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  margin-top: 10px;
+}
+
+.dashboard-card h2 {
+  color: #333;
+  font-size: 1.1rem;
+  margin-bottom: 6px;
+}
+
+.dashboard-card p {
+  color: #666;
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+}

@@ -41,8 +41,13 @@
 
       <!-- หน้า 4: FR-4 Dashboard (งานของ Pattarawat) -->
       <section id="screen-dashboard" class="screen hidden">
-        <h3>แนวโน้มการกินอาหาร 30 วัน</h3>
-        <canvas id="recoveryChart"></canvas>
+        <div class="dashboard-card">
+          <h2>FR-4: Recovery Trend Dashboard</h2>
+          <p>กราฟแสดงประวัติการกินอาหาร 30 วันสำหรับสัตวแพทย์</p>
+          
+          <!-- พื้นที่สำหรับวาดกราฟ -->
+          <canvas id="recoveryChart"></canvas>
+        </div>
       </section>
 
       <!-- หน้า 5: FR-5 AI Portion (งานของ Korawit) -->
@@ -63,9 +68,13 @@
 
   </div>
 
-  <!-- นำเข้าโค้ดทำงานและกราฟ -->
+ <!-- ไลบรารีกราฟ Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="js/dashboard.js"></script>
+
+  <!-- สคริปต์กราฟของ Pattarawat -->
+  <script src="js/trend_dashboard.js"></script>
+
+  <!-- สคริปต์ควบคุมแอปของคุณ -->
   <script src="js/app.js"></script>
 </body>
 </html>
