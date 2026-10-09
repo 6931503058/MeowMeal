@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MeowMeal - Mobile Prototype</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- กรอบจำลองหน้าจอมือถือ -->
+  <div class="mobile-frame">
+    
+    <!-- แถบด้านบนของแอป -->
+    <header class="app-header">
+      <h2>MeowMeal 🐾</h2>
+    </header>
+
+    <!-- พื้นที่หน้าจอหลัก -->
+    <main class="content-area">
+      
+      <!-- หน้า 1: Home (หน้าแรก) -->
+      <section id="screen-home" class="screen">
+        <h3>ยินดีต้อนรับสู่ MeowMeal</h3>
+        <p>ภาพรวมการกินอาหารของน้องแมววันนี้</p>
+      </section>
+
+      <!-- หน้า 2: FR-1 & FR-2 (งานของ Puree) -->
+      <section id="screen-log" class="screen hidden">
+        <h3>บันทึกมื้ออาหาร (Manual Log)</h3>
+        <p>ส่วนของ Puree: บันทึกข้อมูลอาหารและโปรไฟล์</p>
+      </section>
+
+      <!-- หน้า 3: FR-3 Anomaly Alert (งานของคุณ) -->
+      <section id="screen-alert" class="screen hidden">
+        <h3>แจ้งเตือนความผิดปกติ (Early Alert)</h3>
+        <div class="alert-box">
+          ⚠️ <strong>คำเตือน:</strong> แมวกินอาหารลดลงต่อเนื่อง 5 วัน
+        </div>
+      </section>
+
+      <!-- หน้า 4: FR-4 Dashboard (งานของ Pattarawat) -->
+      <section id="screen-dashboard" class="screen hidden">
+        <div class="dashboard-card">
+          <h2>FR-4: Recovery Trend Dashboard</h2>
+          <p>กราฟแสดงประวัติการกินอาหาร 30 วันสำหรับสัตวแพทย์</p>
+          
+          <!-- พื้นที่สำหรับวาดกราฟ -->
+          <canvas id="recoveryChart"></canvas>
+        </div>
+      </section>
+
+      <!-- หน้า 5: FR-5 AI Portion (งานของ Korawit) -->
+      <section id="screen-ai" class="screen hidden">
+        <h3>AI ตรวจสอบปริมาณอาหาร</h3>
+        <p>ส่วนของ Korawit: สแกนชามอาหารด้วย AI</p>
+      </section>
+
+    </main>
+
+    <!-- แถบเมนูด้านล่าง (Bottom Navigation) -->
+    <nav class="bottom-nav">
+      <button onclick="switchScreen('screen-home')">หน้าหลัก</button>
+      <button onclick="switchScreen('screen-alert')">แจ้งเตือน</button>
+      <button onclick="switchScreen('screen-dashboard')">กราฟสรุป</button>
+      <button onclick="switchScreen('screen-ai')">AI ตรวจสอบ</button>
+    </nav>
+
+  </div>
+
+ <!-- ไลบรารีกราฟ Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- สคริปต์กราฟของ Pattarawat -->
+  <script src="js/trend_dashboard.js"></script>
+
+  <!-- สคริปต์ควบคุมแอปของคุณ -->
+  <script src="js/app.js"></script>
+</body>
+</html>
