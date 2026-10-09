@@ -1,3 +1,61 @@
+/* คลาสซ่อนหน้าจอ (หัวใจสำคัญของ SPA) */
+.hidden {
+  display: none !important;
+}
+
+/* ตกแต่งกรอบจำลองมือถือ */
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #f0f2f5;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  display: flex;
+  justify-content: center;
+}
+
+.mobile-frame {
+  width: 100%;
+  max-width: 420px;
+  min-height: 100vh;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+/* Header */
+.app-header {
+  padding: 16px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #eeeeee;
+  text-align: center;
+}
+
+.app-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #333333;
+}
+
+/* Content Area */
+.content-area {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  padding-bottom: 80px; /* เว้นที่ให้ไม่โดน bottom nav บัง */
+}
+
+/* กล่องแจ้งเตือน FR-3 */
+.alert-box {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  padding: 14px;
+  border-radius: 8px;
+  border-left: 4px solid #ef4444;
+  margin-top: 12px;
+}
+
 /* --- ส่วนของ FR-4 Dashboard (Pattarawat) --- */
 .dashboard-card {
   background: #ffffff;
@@ -6,6 +64,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   width: 100%;
   margin-top: 10px;
+  box-sizing: border-box;
 }
 
 .dashboard-card h2 {
@@ -18,4 +77,34 @@
   color: #666;
   font-size: 0.85rem;
   margin-bottom: 16px;
+}
+
+/* Bottom Navigation Bar */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  max-width: 420px;
+  height: 60px;
+  background-color: #ffffff;
+  border-top: 1px solid #eeeeee;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.bottom-nav button {
+  background: none;
+  border: none;
+  font-size: 0.85rem;
+  color: #666666;
+  cursor: pointer;
+  padding: 8px 12px;
+}
+
+.bottom-nav button:hover,
+.bottom-nav button:focus {
+  color: #2563eb;
+  font-weight: bold;
 }
