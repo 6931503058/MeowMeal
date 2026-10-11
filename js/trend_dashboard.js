@@ -1,78 +1,77 @@
-// 1. ตัวแปรสำหรับเก็บ Instance ของกราฟ
-let recoveryChart = null;
+/* 
+   trend_dashboard.js – หน้า Trend 30 วัน (FR-4)
+   SRS:
+     - AC#1: มี log ≥ 1 รายการใน 30 วัน → วาดแท่งรายวันเรียงตามเวลา
+     - AC#2: ไม่มี log เลย → ซ่อนกราฟ แล้วโชว์ "No logs available" (ห้าม error)
+     - NFR-3: กราฟต้องเสร็จใน 2 วินาที
+   */
 
-/**
- * ฟังก์ชันสร้างและอัปเดตข้อมูลกราฟ Recovery Trend
- * @param {Array<number>} newFoodIntake - ปริมาณอาหารที่กินจริง (กรัม)
- * @param {Array<string>} newLabels - ป้ายชื่อวัน (ถ้าไม่ใส่จะเจนให้อัตโนมัติ)
- * @param {number} targetValue - ค่าเป้าหมาย Target Line (Default: 180)
- */
-function updateChartData(newFoodIntake, newLabels = null, targetValue = 180) {
-    const ctx = document.getElementById('recoveryChart').getContext('2d');
+let trendChart = null;   // เก็บกราฟที่วาดไว้ เพื่อทำลายก่อนวาดใหม่ (ไม่งั้นกราฟซ้อนกัน)
 
-    // เจน Label วันที่อัตโนมัติหากไม่มีการส่งเข้ามา
-    const labels = newLabels || Array.from({ length: newFoodIntake.length }, (_, i) => `วันที่ ${i + 1}`);
-    
-    // สร้างเส้น Target Line
-    const targetLine = Array(newFoodIntake.length).fill(targetValue);
+App.register('trend', {
 
-    // กำหนดสี: 5 วันสุดท้ายเป็นสีแดงเตือน วันอื่นเป็นสีฟ้า
-    const backgroundColors = newFoodIntake.map((val, idx) => 
-        idx >= newFoodIntake.length - 5 ? 'rgba(239, 68, 68, 0.7)' : 'rgba(59, 130, 246, 0.7)'
-    );
-    const borderColors = newFoodIntake.map((val, idx) => 
-        idx >= newFoodIntake.length - 5 ? 'rgba(239, 68, 68, 1)' : 'rgba(59, 130, 246, 1)'
-    );
+  // วาดกราฟ "ตอนเปิดหน้า" ไม่ใช่ตอนโหลดเว็บ เพราะหน้านี้ถูกซ่อนอยู่ตอนโหลด
+  // (กราฟที่วาดในกล่องที่ซ่อนอยู่จะได้ขนาดเป็น 0)
+  onShow() {
+    const logs = MeowStore.getLogs();
+    const profile = MeowStore.getProfile();
+    const box = document.getElementById('trend-chart-box');
+    const empty = document.getElementById('trend-empty');
 
-    // ลบกราฟเดิมก่อนสร้างใหม่ เพื่อป้องกันกราฟซ้อน
-    if (recoveryChart) {
-        recoveryChart.destroy();
+    // ทำลายกราฟเก่า (ถ้ามี)
+    if (trendChart) { trendChart.destroy(); trendChart = null; }
+
+    // สร้างรายการ 30 วันล่าสุด (วันที่เก่าสุด → วันนี้)
+    const labels = [];     // ข้อความใต้แท่ง เช่น "10/09"
+    const keys = [];       // กุญแจวันที่ "YYYY-MM-DD" ไว้จับคู่กับข้อมูล
+    const today = new Date();
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      keys.push(dateKey(d.toISOString()));
+      labels.push((d.getMonth() + 1) + '/' + d.getDate());
     }
 
-    // วาดกราฟ Chart.js
-    recoveryChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [
-                {
-                    label: 'ปริมาณอาหารที่กินจริง (กรัม)',
-                    data: newFoodIntake,
-                    backgroundColor: backgroundColors,
-                    borderColor: borderColors,
-                    borderWidth: 1
-                },
-                {
-                    label: 'เป้าหมายมาตรฐาน (Target Line)',
-                    data: targetLine,
-                    type: 'line',
-                    borderColor: '#10B981',
-                    borderWidth: 2,
-                    borderDash: [5, 5],
-                    pointRadius: 0,
-                    fill: false
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: { display: true, text: 'ปริมาณ (กรัม)' }
-                }
-            }
+    // จับคู่ข้อมูลรายวันกับ 30 วัน (วันไหนไม่มี log = null → ไม่มีแท่ง)
+    // ตัดสินใจ: กราฟนี้ไม่นับมื้อ extra snack (ใช้ dailyEaten ค่าเริ่มต้น) ทีมปรับได้
+    const eatenByDay = {};
+    dailyEaten(logs).forEach(d => { eatenByDay[d.date] = Math.round(d.eaten); });
+    const data = keys.map(k => (k in eatenByDay ? eatenByDay[k] : null));
+
+    // ไม่มีข้อมูลเลยใน 30 วัน → empty state (FR-4 AC#2)
+    const hasData = data.some(v => v !== null);
+    box.hidden = !hasData;
+    empty.hidden = hasData;
+    if (!hasData) return;
+
+    // ชุดข้อมูล: แท่ง = % ที่กิน ; เส้น = เป้าหมาย (ถ้ามีโปรไฟล์)
+    const datasets = [{
+      type: 'bar',
+      label: 'Eaten (%)',
+      data: data,
+      backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--primary').trim()
+    }];
+    if (profile) {
+      datasets.push({
+        type: 'line',
+        label: 'Target (%)',
+        data: keys.map(() => profile.dailyTarget),   // เส้นแนวนอนค่าคงที่
+        borderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent').trim(),
+        borderWidth: 2,
+        pointRadius: 0
+      });
+    }
+
+    trendChart = new Chart(document.getElementById('recoveryChart'), {
+      data: { labels, datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,          // ให้สูงตามกล่อง .chart-box (280px)
+        scales: {
+          y: { min: 0, max: 100, title: { display: true, text: '% eaten' } },
+          x: { ticks: { maxTicksLimit: 8 } } // ไม่ให้วันที่แน่นเกินบนจอมือถือ
         }
+      }
     });
-}
-
-// 2. Mock Data 30 วัน (5 วันสุดท้ายลดลงชัดเจนตามโจทย์ FR-4)
-const mockData30Days = [
-    180, 185, 190, 182, 188, 195, 190, 185, 180, 188,
-    192, 185, 190, 188, 195, 190, 185, 180, 188, 190,
-    185, 180, 185, 188, 182,
-    130, 110, 85, 60, 40
-];
-
-// รันแสดงผลครั้งแรกด้วย Mock Data
-updateChartData(mockData30Days);
+  }
+});
