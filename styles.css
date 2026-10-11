@@ -17,7 +17,9 @@ body {
   margin: 0;
 }
 
-button {
+button,
+input,
+select {
   font: inherit;
 }
 
@@ -39,6 +41,10 @@ button {
 .result-card h2 {
   margin: 4px 0 8px;
   line-height: 1.15;
+}
+
+.back-button {
+  margin-bottom: 20px;
 }
 
 .screen-header > p:last-child,
@@ -64,14 +70,18 @@ button {
   min-height: 210px;
   place-content: center;
   justify-items: center;
+  gap: 12px;
   margin: 28px 0 22px;
+  padding: 20px;
   border: 1px dashed #cdbfa8;
   border-radius: 18px;
   background: #fcf8ef;
 }
 
 .camera-card p {
-  margin: 12px 0 0;
+  max-width: 100%;
+  margin: 0;
+  overflow-wrap: anywhere;
   font-size: 0.92rem;
 }
 
@@ -115,12 +125,16 @@ button {
 }
 
 .button {
+  display: inline-flex;
   min-height: 46px;
+  align-items: center;
+  justify-content: center;
   padding: 11px 16px;
   border: 1px solid transparent;
   border-radius: 12px;
   cursor: pointer;
   font-weight: 700;
+  text-align: center;
   transition: background-color 120ms ease, transform 120ms ease;
 }
 
@@ -128,13 +142,15 @@ button {
   transform: translateY(-1px);
 }
 
-.button:focus-visible {
+.button:focus-visible,
+input:focus-visible,
+select:focus-visible {
   outline: 3px solid #e9b866;
   outline-offset: 3px;
 }
 
 .button:disabled {
-  cursor: wait;
+  cursor: not-allowed;
   opacity: 0.65;
 }
 
@@ -172,7 +188,8 @@ button {
 
 .result-list {
   display: flex;
-  gap: 40px;
+  flex-wrap: wrap;
+  gap: 20px 40px;
   margin: 22px 0;
 }
 
@@ -192,6 +209,15 @@ button {
   font-weight: 800;
 }
 
+.result-list input {
+  width: 7ch;
+  border: 1px solid #c8d3c8;
+  border-radius: 8px;
+  color: #385640;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
 .confidence {
   margin: 10px 0 0;
 }
@@ -207,6 +233,7 @@ button {
 
 .demo-note {
   margin: 24px 0 0;
+  color: #b42318;
   font-size: 0.8rem;
 }
 
