@@ -1,6 +1,30 @@
-<<<<<<< HEAD
 <!DOCTYPE html>
+<!--
+  MeowMeal – index.html  (App Shell, ออกแบบตามภาพร่างของทีม)
+  ------------------------------------------------------------------
+  แอปหน้าเดียว (Single-Page App): ทุกหน้าเป็น <section> ในไฟล์นี้ มองเห็นทีละ 1 หน้า
+  ตัวสลับหน้าอยู่ใน js/app.js ; เปลี่ยนหน้าด้วยลิงก์แบบ hash เช่น <a href="#trend">
 
+  เลย์เอาต์ตามภาพร่าง:
+    ┌────────────────────────────────────────┐
+    │ [ไอคอนแมว]   🐾 MeowMeal        [🔔]   │ ← แถบบนสีฟ้าอ่อน
+    │ ┌────────────────────────────────────┐ │
+    │ │ แถบโปรไฟล์แมว                       │ │ ← หน้า Home
+    │ └────────────────────────────────────┘ │
+    │ ┌────────────────────────────────────┐ │
+    │ │ ติดตามสถานะ 5 วันล่าสุด              │ │
+    │ └────────────────────────────────────┘ │
+    │ Home   Trend   (📷)   Snack   Alert    │ ← แท็บล่าง ปุ่มกล้องอยู่กลาง
+    └────────────────────────────────────────┘
+
+  แผนที่หน้า ↔ FR:
+    #home     Home                    แสดงผล FR-1 (โปรไฟล์) + สถานะ FR-3 (5 วัน)
+    #trend    Trend                   FR-4
+    #log      Log meal (ปุ่มกล้อง)     FR-5 (ถ่ายรูป/เลือกรูป) + FR-2 (เลือก % เอง)
+    #snack    Snack                   FR-2 (extra snack → isOutlier)
+    #alerts   Alert (+ปุ่มกระดิ่ง)     FR-3
+    #profile  Cat profile & settings  FR-1 (ไอคอนแมวมุมซ้ายบน) + ตั้งค่า
+-->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -8,14 +32,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>MeowMeal</title>
 
-  <!-- ฟอนต์ Quicksand -->
+  <!-- ฟอนต์ Quicksand (กลมๆ เข้ากับธีมแมว) ถ้าโหลดไม่ได้จะใช้ฟอนต์ระบบแทนอัตโนมัติ -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="css/style.css">
 
-  <!-- Chart.js ใช้เฉพาะกราฟ FR-4 -->
+  <!-- Chart.js ใช้เฉพาะกราฟ FR-4 ; @4.4.0 = ล็อกเวอร์ชัน กันเวอร์ชันใหม่ทำกราฟพัง -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
 </head>
 
@@ -23,8 +47,8 @@
   <!-- กรอบมือถือ: มือถือจริง = เต็มจอ / จอคอม = กรอบกว้าง ~420px ตรงกลาง -->
   <div class="phone">
 
-    <!-- แถบบน สีฟ้าอ่อน (อยู่ทุกหน้า)
-         ซ้าย: ไอคอนแมว = หน้าโปรไฟล์ + ตั้งค่า | กลาง: โลโก้ | ขวา: กระดิ่ง = หน้าแจ้งเตือน -->
+    <!-- ===== แถบบน สีฟ้าอ่อน (อยู่ทุกหน้า) =====
+         ซ้าย: ไอคอนแมว → หน้าโปรไฟล์ + ตั้งค่า | กลาง: โลโก้ | ขวา: กระดิ่ง → หน้าแจ้งเตือน -->
     <header class="app-header">
       <a class="hdr-btn" href="#profile" aria-label="Cat profile and settings">
         <!-- ไอคอนหน้าแมว -->
@@ -55,21 +79,22 @@
       </a>
     </header>
 
-    <!-- พื้นที่เนื้อหา: 1 <section> = 1 หน้า -->
+    <!-- ===== พื้นที่เนื้อหา: 1 <section> = 1 หน้า ===== -->
     <main class="content">
 
-      <!--  HOME – FR-1 + FR-3 (Golden Thread)  -->
-      <!-- บน = แถบโปรไฟล์แมว / ล่าง = ติดตามสถานะ 5 วันล่าสุด, ข้อมูลจาก js/home.js -->
+      <!-- ################ HOME ################
+           ตามภาพ: บน = แถบโปรไฟล์แมว / ล่าง = ติดตามสถานะ 5 วันล่าสุด
+           เนื้อหาเติมโดย js/home.js -->
       <section id="view-home" class="view" data-tab="home">
 
-        <!-- ถ้ายังไม่มีโปรไฟล์จะโชว์กล่องนี้แทน -->
+        <!-- ยังไม่มีโปรไฟล์ → โชว์กล่องนี้แทน -->
         <div id="home-empty" class="card" hidden>
           <h2>Welcome to MeowMeal</h2>
           <p class="muted">Add your cat's profile to start tracking recovery meals.</p>
           <a class="btn primary" href="#profile">Add cat profile</a>
         </div>
 
-        <!-- แถบโปรไฟล์แมว (FR-1): กดแล้วไปแก้ไขได้ -->
+        <!-- แถบโปรไฟล์แมว (ผล FR-1): กดแล้วไปแก้ไขได้ -->
         <a id="home-profile" class="card profile-strip" href="#profile" hidden>
           <div class="avatar" aria-hidden="true">
             <svg class="ico" viewBox="0 0 24 24">
@@ -100,7 +125,7 @@
         </div>
       </section>
 
-      <!-- TREND – FR-4 -->
+      <!-- ################ TREND – FR-4 ################ -->
       <section id="view-trend" class="view" data-tab="trend">
         <h1>Recovery trend</h1>
         <p class="muted">Last 30 days. Show this to your vet at the next visit.</p>
@@ -114,8 +139,8 @@
         </div>
       </section>
 
-      <!-- LOG MEAL (ปุ่มกล้องตรงกลาง) – FR-5 + FR-2 
-           กดปุ่มกล้อง = ถ่ายรูป/เลือกรูป -> ถ่ายใหม่ได้ -> มีปุ่ม Log meal
+      <!-- ################ LOG MEAL (ปุ่มกล้องกลาง) – FR-5 + FR-2 ################
+           ตามภาพ: กดปุ่มกล้อง → ถ่ายรูป/เลือกรูป → ถ่ายใหม่ได้ → มีปุ่ม Log meal
            ถ้าไม่อยากถ่ายรูป ก็เลือก % เองได้ (FR-2: ไม่พึ่งกล้องอย่างเดียว) -->
       <section id="view-log" class="view" data-tab="log">
         <h1>Log a meal</h1>
@@ -164,7 +189,7 @@
         <button id="log-confirm" class="btn primary big full" type="button" disabled>Log meal</button>
       </section>
 
-      <!-- SNACK – FR-2 (extra snack)
+      <!-- ################ SNACK – FR-2 (extra snack) ################
            ขนมนอกมื้อ: บันทึกแยก ติด isOutlier = true → ไม่นับใน baseline ของ FR-3 -->
       <section id="view-snack" class="view" data-tab="snack">
         <h1>Extra snack</h1>
@@ -189,7 +214,7 @@
         </div>
       </section>
 
-      <!-- ALERTS – FR-3 (Golden Thread) -->
+      <!-- ################ ALERTS – FR-3 (Golden Thread) ################ -->
       <section id="view-alerts" class="view" data-tab="alerts">
         <h1>Alerts</h1>
         <div class="card">
@@ -203,7 +228,7 @@
         <p id="alerts-empty" class="empty" hidden>No alerts yet</p>
       </section>
 
-      <!-- CAT PROFILE & SETTINGS – FR-1
+      <!-- ################ CAT PROFILE & SETTINGS – FR-1 ################
            ตามภาพ: ไอคอนมุมซ้ายบน = "มีหน้าโปรไฟล์, setting" จึงรวมไว้หน้าเดียวกัน -->
       <section id="view-profile" class="view" data-tab="">
         <h1>Cat profile</h1>
@@ -264,7 +289,7 @@
 
     </main>
 
-    <!-- แท็บล่าง: ปุ่มพร้อมชื่อ + ปุ่มกล้องกลาง (ตามภาพ)
+    <!-- ===== แท็บล่าง: ปุ่มพร้อมชื่อ + ปุ่มกล้องกลาง (ตามภาพ) =====
          data-tab ต้องตรงกับ data-tab ของ <section> เพื่อไฮไลต์ถูกปุ่ม -->
     <nav class="tabbar" aria-label="Main">
       <a class="tab" href="#home" data-tab="home">
@@ -302,7 +327,13 @@
 
   </div><!-- /.phone -->
 
-  
+  <!-- ===== สคริปต์ =====
+       ลำดับสำคัญ: ไฟล์ที่ถูกเรียกใช้ต้องโหลดก่อนไฟล์ที่เรียกใช้มัน
+         1) storage.js + anomaly_detector.js = เครื่องมือกลาง
+         2) app.js                           = สร้างตัวแปร App (ไฟล์หน้าต่างๆ เรียก App.register)
+         3) ไฟล์ของแต่ละหน้า                 = ลงทะเบียนตัวเองกับ App
+            (log.js ต้องมาก่อน photo.js เพราะ photo.js เรียกใช้ LogMeal ของ log.js)
+       app.js เริ่มทำงานจริงตอนโหลดครบทุกสคริปต์ (DOMContentLoaded) จึงอยู่ก่อนไฟล์หน้าต่างๆ ได้ -->
   <script src="js/storage.js"></script>
   <script src="js/anomaly_detector.js"></script>
   <script src="js/app.js"></script>
@@ -315,41 +346,4 @@
   <script src="js/alerts.js"></script>           <!-- Parewa FR-3 -->
   <script src="js/profile.js"></script>          <!-- Puree FR-1 -->
 </body>
-=======
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MeowMeal - FR-4 Recovery Trend Dashboard</title>
-    <!-- Chart.js CDN Link -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f9fafb;
-        }
-        .dashboard-container {
-            width: 90%;
-            max-width: 900px;
-            margin: 0 auto;
-            background: #ffffff;
-            padding: 24px;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-    </style>
-</head>
-<body>
-
-    <div class="dashboard-container">
-        <h2>MeowMeal: Feline Historical Recovery Trend (FR-4)</h2>
-        <canvas id="recoveryChart" width="800" height="400"></canvas>
-    </div>
-
-    <!-- Script Importation -->
-    <script src="dashboard.js"></script>
-</body>
->>>>>>> edf29aa (add empty state support for FR-4 dashboard)
 </html>
