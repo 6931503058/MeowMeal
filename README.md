@@ -23,7 +23,7 @@ Irregular wet-diet leftovers make home tracking difficult, leaving vet checkups 
 - **Why it matters:** Prolonged underfeeding triggers organ failure, emergency re-hospitalization, and lost diagnostic time.
 
 ## Demo
-- Web: _(add your GitHub Pages link here)_
+- Web: _([GitHub Pages](https://github.com/6931503058/MeowMeal))_
 - Screenshots: _(add images to `docs/screenshots/` and link them here)_
 
 
