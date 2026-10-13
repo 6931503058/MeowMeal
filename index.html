@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <!DOCTYPE html>
 
 <html lang="en">
@@ -14,6 +13,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="css/style.css">
+  <!-- สไตล์หน้า Sign in (ชั้นซ้อนในกรอบ .phone) -->
+  <link rel="stylesheet" href="css/login.css">
 
   <!-- Chart.js ใช้เฉพาะกราฟ FR-4 -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
@@ -114,7 +115,7 @@
         </div>
       </section>
 
-      <!-- LOG MEAL (ปุ่มกล้องตรงกลาง) – FR-5 + FR-2 
+      <!-- LOG MEAL (ปุ่มกล้องตรงกลาง) – FR-5 + FR-2
            กดปุ่มกล้อง = ถ่ายรูป/เลือกรูป -> ถ่ายใหม่ได้ -> มีปุ่ม Log meal
            ถ้าไม่อยากถ่ายรูป ก็เลือก % เองได้ (FR-2: ไม่พึ่งกล้องอย่างเดียว) -->
       <section id="view-log" class="view" data-tab="log">
@@ -245,6 +246,13 @@
           </select>
         </div>
 
+        <!-- บัญชีผู้ใช้: แสดงชื่อ + ปุ่มออกจากระบบ (js/login.js ผูกปุ่มและใส่ชื่อให้) -->
+        <div class="card">
+          <h2>Account</h2>
+          <p class="muted">Signed in as <strong id="acct-name">–</strong></p>
+          <button id="btn-signout" type="button">Sign out</button>
+        </div>
+
         <div class="card">
           <h2>About</h2>
           <p class="muted">
@@ -300,9 +308,89 @@
       </a>
     </nav>
 
+    <!-- ===== SIGN IN / FORGOT / REGISTER =====
+         ชั้นซ้อนอยู่ภายในกรอบ .phone เดียวกับแอป: ยังไม่ล็อกอิน = คลุมทั้งแอป / ล็อกอินแล้ว = js/login.js ซ่อนให้ -->
+    <div id="auth-overlay" class="auth-overlay" role="dialog" aria-modal="true" aria-label="Sign in to MeowMeal">
+      <header class="auth-top">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="6" cy="10" r="2"/><circle cx="10" cy="5.5" r="2"/>
+          <circle cx="14" cy="5.5" r="2"/><circle cx="18" cy="10" r="2"/>
+          <path d="M12 11c-3 0-5.5 3-5.5 5.2 0 1.8 1.5 2.3 3 2 .9-.2 1.6-.4 2.5-.4s1.6.2 2.5.4c1.5.3 3-.2 3-2C17.5 14 15 11 12 11z"/>
+        </svg>
+        <span>MeowMeal</span>
+      </header>
+
+      <div class="auth-body">
+
+        <!-- Sign in -->
+        <section id="au-view-signin">
+          <h2>Sign in</h2>
+          <div class="auth-panel">
+            <form id="au-signin-form" novalidate>
+              <label for="au-si-email">Email</label>
+              <input id="au-si-email" type="email" autocomplete="email">
+              <div class="auth-err" id="au-si-email-err" hidden></div>
+
+              <label for="au-si-pw">Password</label>
+              <input id="au-si-pw" type="password" autocomplete="current-password">
+              <div class="auth-err" id="au-si-pw-err" hidden></div>
+
+              <button type="submit" class="auth-btn" id="au-si-btn">Sign in</button>
+              <div class="auth-status" id="au-si-status" hidden role="status"></div>
+            </form>
+            <p class="auth-links"><button type="button" class="auth-link" data-go="forgot">Forgot password?</button></p>
+            <p class="auth-links">Don't have an account? <button type="button" class="auth-link" data-go="register">Register</button></p>
+          </div>
+        </section>
+
+        <!-- Forgot password -->
+        <section id="au-view-forgot" hidden>
+          <h2>Forgot password?</h2>
+          <div class="auth-panel">
+            <p class="auth-sub">Enter your email and we'll send you a link to reset your password.</p>
+            <form id="au-forgot-form" novalidate>
+              <label for="au-fp-email">Email</label>
+              <input id="au-fp-email" type="email" autocomplete="email">
+              <div class="auth-err" id="au-fp-email-err" hidden></div>
+              <button type="submit" class="auth-btn">Send reset link</button>
+              <div class="auth-status" id="au-fp-status" hidden role="status"></div>
+            </form>
+            <p class="auth-links"><button type="button" class="auth-link" data-go="signin">Back to sign in</button></p>
+          </div>
+        </section>
+
+        <!-- Register -->
+        <section id="au-view-register" hidden>
+          <h2>Register</h2>
+          <div class="auth-panel">
+            <form id="au-register-form" novalidate>
+              <label for="au-rg-email">Email</label>
+              <input id="au-rg-email" type="email" autocomplete="email">
+              <div class="auth-err" id="au-rg-email-err" hidden></div>
+
+              <label for="au-rg-user">Username</label>
+              <input id="au-rg-user" autocomplete="username">
+              <div class="auth-hint">English letters and digits. A single hyphen may separate parts (not at the start or end).</div>
+              <div class="auth-err" id="au-rg-user-err" hidden></div>
+
+              <label for="au-rg-pw">Password</label>
+              <input id="au-rg-pw" type="password" autocomplete="new-password">
+              <div class="auth-hint">At least 10 characters, or at least 8 with a digit and a lowercase letter.</div>
+              <div class="auth-err" id="au-rg-pw-err" hidden></div>
+
+              <button type="submit" class="auth-btn" id="au-rg-btn">Create account</button>
+              <div class="auth-status" id="au-rg-status" hidden role="status"></div>
+            </form>
+            <p class="auth-links">Already have an account? <button type="button" class="auth-link" data-go="signin">Sign in</button></p>
+          </div>
+        </section>
+
+      </div>
+    </div>
+
   </div><!-- /.phone -->
 
-  
+
   <script src="js/storage.js"></script>
   <script src="js/anomaly_detector.js"></script>
   <script src="js/app.js"></script>
@@ -314,42 +402,6 @@
   <script src="js/snack.js"></script>
   <script src="js/alerts.js"></script>           <!-- Parewa FR-3 -->
   <script src="js/profile.js"></script>          <!-- Puree FR-1 -->
+  <script src="js/login.js"></script>            <!-- Sign in: ต้องโหลดหลังสุด -->
 </body>
-=======
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MeowMeal - FR-4 Recovery Trend Dashboard</title>
-    <!-- Chart.js CDN Link -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f9fafb;
-        }
-        .dashboard-container {
-            width: 90%;
-            max-width: 900px;
-            margin: 0 auto;
-            background: #ffffff;
-            padding: 24px;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-    </style>
-</head>
-<body>
-
-    <div class="dashboard-container">
-        <h2>MeowMeal: Feline Historical Recovery Trend (FR-4)</h2>
-        <canvas id="recoveryChart" width="800" height="400"></canvas>
-    </div>
-
-    <!-- Script Importation -->
-    <script src="dashboard.js"></script>
-</body>
->>>>>>> edf29aa (add empty state support for FR-4 dashboard)
 </html>

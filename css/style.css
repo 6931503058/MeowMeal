@@ -1,3 +1,59 @@
+/* login.css – หน้า Sign in แสดงเป็น "ชั้นซ้อน" ภายในกรอบ .phone เดียวกับแอป
+   ใช้ prefix auth- และตัวแปร --a-* ทั้งหมด จึงไม่ชนกับ style.css ของทีม */
+
+.phone { position: relative; }              /* ให้ชั้น login ยึดตามกรอบมือถือ (ไม่ใช่ทั้งหน้าเว็บ) */
+
+.auth-overlay {
+  --a-page:#eaf5fc; --a-card:#fff; --a-edge:#bcdcec; --a-ink:#0f2e3d; --a-mute:#6f8794; --a-text2:#4b6573;
+  --a-btn:#7cc0e4; --a-onbtn:#0f2e3d; --a-link:#2a7fb0;
+  --a-bad:#c8412f; --a-badbg:#fdebe7; --a-okbg:#e3f2fb; --a-ok:#1f6e99; --a-top:#bfe2f5;
+  position: absolute; inset: 0; z-index: 100;           /* คลุมทั้งกรอบ รวมแถบบนและแท็บล่างของแอป */
+  display: flex; flex-direction: column;
+  background: var(--a-page); color: var(--a-ink);
+  font-family: inherit; border-radius: inherit; overflow: hidden;
+}
+.auth-overlay[hidden], .auth-overlay [hidden] { display: none !important; }
+
+/* แถบบน สีฟ้าอ่อน + โลโก้กลาง */
+.auth-top {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 14px 16px; padding-top: calc(14px + env(safe-area-inset-top, 0px));
+  background: var(--a-top); font-weight: 700; font-size: 20px;
+}
+.auth-top svg { width: 26px; height: 26px; fill: currentColor; flex: none; }
+
+.auth-body { flex: 1; overflow-y: auto; padding: 16px; padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px)); }
+.auth-body h2 { margin: 8px 0 14px; font-size: 26px; font-weight: 700; }
+
+/* การ์ดขาว ขอบฟ้าอ่อนมน */
+.auth-panel { background: var(--a-card); border: 1px solid var(--a-edge); border-radius: 22px; padding: 16px; }
+.auth-sub  { margin: 0 0 4px; color: var(--a-text2); font-size: 14px; }
+.auth-panel label { display: block; margin: 14px 0 6px; font-size: 13px; font-weight: 700; color: var(--a-mute); }
+.auth-panel form > label:first-child { margin-top: 6px; }
+
+/* ช่องกรอก: สูง 44px มุมมน 14px */
+.auth-panel input {
+  width: 100%; height: 44px; padding: 0 14px; box-sizing: border-box;
+  border: 1px solid var(--a-edge); border-radius: 14px;
+  background: var(--a-card); color: var(--a-ink); font: inherit;
+}
+.auth-panel input.field-error { border-color: var(--a-bad); background: var(--a-badbg); }
+.auth-overlay input:focus-visible, .auth-overlay button:focus-visible { outline: 3px solid var(--a-btn); outline-offset: 2px; }
+
+.auth-btn {
+  width: 100%; height: 48px; margin-top: 18px; border: 0; border-radius: 12px;
+  background: var(--a-btn); color: var(--a-onbtn); font: inherit; font-weight: 700; cursor: pointer;
+}
+.auth-btn:disabled { opacity: .6; cursor: wait; }
+.auth-hint { color: var(--a-text2); font-size: 12.5px; margin-top: 6px; }
+.auth-err  { color: var(--a-bad); font-size: 13px; margin-top: 4px; }
+.auth-status { padding: 10px 12px; border-radius: 12px; font-size: 14px; margin-top: 12px; }
+.auth-status.ok  { background: var(--a-okbg); color: var(--a-ok); }
+.auth-status.bad { background: var(--a-badbg); color: var(--a-bad); }
+.auth-links { margin: 14px 0 0; text-align: center; font-size: 14px; color: var(--a-text2); }
+.auth-link { background: none; border: 0; padding: 4px; font: inherit; font-weight: 600; color: var(--a-link); cursor: pointer; text-decoration: underline; }
+
+
 /* 
    MeowMeal – style.css
    โครงไฟล์: 1) tokens  2) พื้นฐาน  3) กรอบมือถือ/แถบบน/แท็บล่าง
