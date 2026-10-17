@@ -1,11 +1,11 @@
-/* 
-   MeowMeal – style.css
+/* =====================================================================
+   MeowMeal – style.css  (ธีมสีฟ้าอ่อนตามภาพร่าง)
    โครงไฟล์: 1) tokens  2) พื้นฐาน  3) กรอบมือถือ/แถบบน/แท็บล่าง
              4) ส่วนประกอบที่ใช้ร่วม  5) สไตล์เฉพาะหน้า
-   อยากเปลี่ยนสีทั้งแอป → แก้ tokens ข้างล่างที่เดียว 
-    */
+   อยากเปลี่ยนสีทั้งแอป → แก้ tokens ข้างล่างที่เดียว
+   ===================================================================== */
 
-/* 1) TOKENS */
+/* ---------- 1) TOKENS ---------- */
 :root {
   --sky-50:  #eef7fc;   /* พื้นหลังแอป */
   --sky-100: #dbeffa;   /* พื้นช่อง/แทร็กกราฟ */
@@ -26,7 +26,7 @@
   --header-h: 56px;
 }
 
-/* 2) BASE */
+/* ---------- 2) BASE ---------- */
 *, *::before, *::after { box-sizing: border-box; }   /* width รวม padding/border */
 body {
   margin: 0;
@@ -47,7 +47,7 @@ a  { color: var(--sky-700); font-weight: 700; }
        stroke-linecap: round; stroke-linejoin: round; flex: none; }
 .ico-fill { fill: currentColor; stroke: none; }
 
-/* 3) FRAME / HEADER / TABBAR */
+/* ---------- 3) FRAME / HEADER / TABBAR ---------- */
 /* มือถือ: เต็มจอ | จอใหญ่: กรอบกว้างสูงสุด 420px กลางจอ */
 .phone {
   position: relative;            /* ให้ลูกที่ absolute อ้างอิงกรอบนี้ */
@@ -107,12 +107,12 @@ a  { color: var(--sky-700); font-weight: 700; }
        border-radius: 50%; background: var(--alert); border: 2px solid var(--sky-200); }
 .tab .dot { top: 12px; right: calc(50% - 22px); border-color: var(--surface); }
 
-/* VIEWS: ซ่อนทุกหน้า แสดงเฉพาะที่มี .active */
+/* ---------- VIEWS: ซ่อนทุกหน้า แสดงเฉพาะที่มี .active ---------- */
 .view { display: none; }
 .view.active { display: block; }
 [hidden] { display: none !important; }   /* ให้ attribute hidden ซ่อนจริงเสมอ */
 
-/* 4) SHARED COMPONENTS */
+/* ---------- 4) SHARED COMPONENTS ---------- */
 .card { background: var(--surface); border: 1px solid var(--line);
         border-radius: var(--radius); padding: 16px; margin-bottom: 14px; }
 .row-between { display: flex; justify-content: space-between; align-items: center; }
@@ -163,7 +163,7 @@ details button { margin: 6px 6px 0 0; }
 .pct-btn { padding: 0; min-height: 56px; font-size: 1rem; }
 .pct-btn.selected, .snack-btn.selected { background: var(--sky-400); border-color: var(--sky-700); }
 
-/* 5) PER-VIEW (ขึ้นต้นด้วย id หน้า กันชนกัน) */
+/* ---------- 5) PER-VIEW (ขึ้นต้นด้วย id หน้า กันชนกัน) ---------- */
 
 /* Home: แถบโปรไฟล์แมว */
 #view-home .profile-strip { display: flex; align-items: center; gap: 14px;
