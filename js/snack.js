@@ -19,8 +19,11 @@ function renderTodaySnacks() {
   list.innerHTML = '';
   snacks.forEach(s => {
     const li = document.createElement('li');
-    const time = new Date(s.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    li.textContent = time + '  ·  ' + s.dietTag;      // textContent = ปลอดภัยกว่า innerHTML
+    const time = new Date(s.timestamp).toLocaleTimeString(
+      I18n.language === 'th' ? 'th-TH' : 'en-US',
+      { hour: '2-digit', minute: '2-digit' }
+    );
+    li.textContent = time + '  ·  ' + I18n.t(s.dietTag);
     list.appendChild(li);
   });
   document.getElementById('snack-empty').hidden = snacks.length > 0;
@@ -39,7 +42,7 @@ App.register('snack', {
 
       if (!MeowStore.getProfile()) {
         status.className = 'status bad';
-        status.textContent = "Add your cat's profile first (cat icon, top left).";
+        I18n.setText(status, "Add your cat's profile first (cat icon, top left).");
         return;
       }
       const saved = MeowStore.addLog({
@@ -50,7 +53,7 @@ App.register('snack', {
         isOutlier: true                       // ← สำคัญ: ไม่นับใน baseline
       });
       status.className = saved ? 'status ok' : 'status bad';
-      status.textContent = saved ? 'Snack saved.' : 'Could not save. Browser storage may be full.';
+      I18n.setText(status, saved ? 'Snack saved.' : 'Could not save. Browser storage may be full.');
       selectSnack(null);
       renderTodaySnacks();
     });
