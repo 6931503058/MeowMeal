@@ -2,8 +2,6 @@
    home.js – หน้า Home (1) แถบโปรไฟล์แมว  (2) ติดตามสถานะ 5 วันล่าสุด
  */
 
-const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
 App.register('home', {
 
   onShow() {
@@ -19,7 +17,8 @@ App.register('home', {
     // ---------- (1) แถบโปรไฟล์แมว ----------
     document.getElementById('home-cat-name').textContent = profile.name;
     document.getElementById('home-cat-detail').textContent =
-      profile.age + ' yr · ' + profile.weight + ' kg · ' + profile.diagnosis;
+      profile.age + (I18n.language === 'th' ? ' ปี' : ' yr') + ' · ' +
+      profile.weight + ' kg · ' + profile.diagnosis;
     document.getElementById('home-target').textContent = profile.dailyTarget + '%';
 
     // ---------- (2) ติดตาม 5 วันล่าสุด ----------
@@ -62,7 +61,7 @@ App.register('home', {
 
       const label = document.createElement('div');
       label.className = 'dlabel';
-      label.innerHTML = DAY_NAMES[d.getDay()] + '<br>' + d.getDate();   // ข้อมูลภายใน ไม่ใช่ input ผู้ใช้
+      label.innerHTML = d.toLocaleDateString(I18n.language === 'th' ? 'th-TH' : 'en-US', { weekday: 'short' }) + '<br>' + d.getDate();
 
       col.append(val, track, label);
       wrap.appendChild(col);
@@ -71,7 +70,10 @@ App.register('home', {
     // ป้ายสรุปมุมขวาบนของการ์ด: จำนวนวันติดกันที่ต่ำกว่าเป้า (ตัวนับของ FR-3)
     const result = detectAnomaly(logs, profile);
     const pill = document.getElementById('home-streak');
-    pill.textContent = result.streak + ' of ' + ALERT_STREAK_DAYS + ' days below target';
+    pill.textContent = I18n.t('{streak} of {days} days below target', {
+      streak: result.streak,
+      days: ALERT_STREAK_DAYS
+    });
     pill.classList.toggle('warn', result.streak > 0);
   }
 });
