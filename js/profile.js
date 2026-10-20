@@ -18,12 +18,12 @@ function setFieldError(field, message) {
 // ตรวจข้อมูล: คืน object ของ error  { ชื่อช่อง: ข้อความ } (ว่าง = ผ่านหมด)
 function validateProfile(v) {
   const errors = {};
-  if (!v.name) errors.name = 'Enter a name.';
-  if (!(v.age > 0)) errors.age = 'Age must be greater than 0.';
-  if (!(v.weight > 0)) errors.weight = 'Weight must be greater than 0.';
-  if (!v.diagnosis) errors.diagnosis = 'Enter the diagnosis or recovery context.';
-  if (!(v.dailyTarget > 0)) errors.target = 'Target must be greater than 0.';
-  else if (v.dailyTarget > 100) errors.target = 'Target cannot be more than 100%.';
+  if (!v.name) errors.name = I18n.t('Enter a name.');
+  if (!(v.age > 0)) errors.age = I18n.t('Age must be greater than 0.');
+  if (!(v.weight > 0)) errors.weight = I18n.t('Weight must be greater than 0.');
+  if (!v.diagnosis) errors.diagnosis = I18n.t('Enter the diagnosis or recovery context.');
+  if (!(v.dailyTarget > 0)) errors.target = I18n.t('Target must be greater than 0.');
+  else if (v.dailyTarget > 100) errors.target = I18n.t('Target cannot be more than 100%.');
   return errors;
 }
 
@@ -59,7 +59,7 @@ App.register('profile', {
       location.hash = '#home';
     });
     document.getElementById('btn-reset').addEventListener('click', () => {
-      if (confirm('Delete the profile, meal logs and alerts?')) {
+      if (confirm(I18n.t('Delete the profile, meal logs and alerts?'))) {
         MeowStore.clearAll();
         App.refresh();
       }
