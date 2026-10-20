@@ -49,7 +49,13 @@ App.register('trend', {
       type: 'bar',
       label: I18n.t('Eaten (%)'),
       data: data,
-      backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--primary').trim()
+      backgroundColor: data.map((value, index) =>
+        index >= data.length - 5 ? 'rgba(239, 68, 68, 0.7)' : 'rgba(59, 130, 246, 0.7)'
+      ),
+      borderColor: data.map((value, index) =>
+        index >= data.length - 5 ? 'rgba(239, 68, 68, 1)' : 'rgba(59, 130, 246, 1)'
+      ),
+      borderWidth: 1
     }];
     if (profile) {
       datasets.push({
@@ -58,7 +64,9 @@ App.register('trend', {
         data: keys.map(() => profile.dailyTarget),   // เส้นแนวนอนค่าคงที่
         borderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent').trim(),
         borderWidth: 2,
-        pointRadius: 0
+        borderDash: [5, 5],
+        pointRadius: 0,
+        fill: false
       });
     }
 
