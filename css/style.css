@@ -1,0 +1,213 @@
+/* =====================================================================
+   MeowMeal – style.css  (ธีมสีฟ้าอ่อนตามภาพร่าง)
+   โครงไฟล์: 1) tokens  2) พื้นฐาน  3) กรอบมือถือ/แถบบน/แท็บล่าง
+             4) ส่วนประกอบที่ใช้ร่วม  5) สไตล์เฉพาะหน้า
+   อยากเปลี่ยนสีทั้งแอป → แก้ tokens ข้างล่างที่เดียว
+   ===================================================================== */
+
+/* ---------- 1) TOKENS ---------- */
+:root {
+  --sky-50:  #eef7fc;   /* พื้นหลังแอป */
+  --sky-100: #dbeffa;   /* พื้นช่อง/แทร็กกราฟ */
+  --sky-200: #bfe3f5;   /* แถบบน + ปุ่มกล้อง (สีฟ้าอ่อนตามภาพ) */
+  --sky-400: #7cc1e6;   /* ปุ่มหลัก/แท่งกราฟ */
+  --sky-700: #1f6f95;   /* ลิงก์/ไอคอนที่ต้องเด่นบนพื้นขาว */
+  --ink:     #14333f;   /* ตัวอักษรหลัก (เข้มพอบนพื้นฟ้าอ่อนทุกเฉด) */
+  --ink-soft:#50707d;   /* ตัวอักษรรอง */
+  --surface: #ffffff;   /* การ์ด */
+  --line:    #c6dfec;   /* เส้นขอบ */
+  --warn:    #e0745a;   /* แท่ง "ต่ำกว่าเป้า" */
+  --warn-bg: #fde8e2;
+  --alert:   #b4412a;   /* ข้อความ error / จุดแจ้งเตือน */
+  --radius:  18px;      /* มุมการ์ด */
+  --radius-sm: 12px;    /* มุมปุ่ม/ช่องกรอก */
+  --tap:     48px;      /* ปุ่มขั้นต่ำที่นิ้วกดสะดวก (>= 44px) */
+  --tabbar-h: 68px;
+  --header-h: 56px;
+}
+
+/* ---------- 2) BASE ---------- */
+*, *::before, *::after { box-sizing: border-box; }   /* width รวม padding/border */
+body {
+  margin: 0;
+  font-family: "Quicksand", system-ui, -apple-system, "Segoe UI", "Noto Sans Thai", sans-serif;
+  background: var(--sky-100);
+  color: var(--ink);
+  line-height: 1.5;
+}
+h1 { font-size: 1.5rem; margin: 4px 0 12px; }
+h2 { font-size: 1.1rem; margin: 0 0 10px; }
+p  { margin: 0 0 12px; }
+a  { color: var(--sky-700); font-weight: 700; }
+.muted { color: var(--ink-soft); }
+.hint  { color: var(--ink-soft); font-size: .85rem; margin: 8px 0 0; }
+
+/* ไอคอน SVG: เส้นสีตามตัวอักษร (currentColor) */
+.ico { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 2;
+       stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.ico-fill { fill: currentColor; stroke: none; }
+
+/* ---------- 3) FRAME / HEADER / TABBAR ---------- */
+/* มือถือ: เต็มจอ | จอใหญ่: กรอบกว้างสูงสุด 420px กลางจอ */
+.phone {
+  position: relative;            /* ให้ลูกที่ absolute อ้างอิงกรอบนี้ */
+  max-width: 420px; min-height: 100vh; margin: 0 auto;
+  background: var(--sky-50);
+  display: flex; flex-direction: column;   /* header → content → (tabbar absolute) */
+}
+@media (min-width: 600px) {
+  .phone { min-height: 0; height: 820px; margin-top: 24px; border-radius: 30px;
+           overflow: hidden; box-shadow: 0 12px 40px rgba(20,51,63,.2); }
+}
+
+/* แถบบนสีฟ้าอ่อน: ซ้าย ไอคอนโปรไฟล์ | กลาง โลโก้ | ขวา กระดิ่ง */
+.app-header {
+  display: flex; align-items: center; justify-content: space-between;
+  min-height: calc(var(--header-h) + env(safe-area-inset-top, 0px));
+  padding: env(safe-area-inset-top, 0px) 8px 0;   /* เว้นรอยบาก iPhone */
+  background: var(--sky-200);
+}
+.brand { display: flex; align-items: center; gap: 8px; font-size: 1.3rem;
+         text-decoration: none; color: var(--ink); }
+.hdr-btn { position: relative; width: var(--tap); height: var(--tap);
+           display: flex; align-items: center; justify-content: center; color: var(--ink); }
+
+/* พื้นที่เนื้อหา: เลื่อนได้เอง (flex:1 = กินที่ที่เหลือ) เว้นล่างไม่ให้โดนแท็บล่างบัง */
+.content { flex: 1; overflow-y: auto; padding: 16px 16px calc(var(--tabbar-h) + 36px); }
+
+/* แท็บล่าง: 5 ช่อง (ช่องกลางกว้างกว่าไว้ใส่ปุ่มกล้อง) */
+.tabbar {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  display: grid; grid-template-columns: 1fr 1fr 84px 1fr 1fr; align-items: end;
+  background: var(--surface); border-top: 1px solid var(--line);
+  padding-bottom: env(safe-area-inset-bottom, 0px);   /* เว้นแถบ home ของ iPhone */
+}
+.tab {
+  position: relative; min-height: var(--tabbar-h);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  text-decoration: none; color: var(--ink-soft); font-size: .75rem; font-weight: 500;
+}
+.tab.active { color: var(--sky-700); font-weight: 700; }
+.tab.active::before { content: ""; position: absolute; top: 0; width: 28px; height: 3px;
+                      border-radius: 0 0 3px 3px; background: var(--sky-700); }
+
+/* ปุ่มกล้องกลาง: วงกลมสีฟ้าอ่อน ลอยสูงกว่าแท็บอื่น */
+.cam {
+  justify-self: center; margin-bottom: 14px;
+  width: 64px; height: 64px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--sky-200); color: var(--ink);
+  border: 3px solid var(--surface);
+  box-shadow: 0 4px 14px rgba(20,51,63,.25);
+}
+.cam .ico { width: 30px; height: 30px; }
+.cam.active { background: var(--sky-400); }
+
+.dot { position: absolute; top: 10px; right: 10px; width: 10px; height: 10px;
+       border-radius: 50%; background: var(--alert); border: 2px solid var(--sky-200); }
+.tab .dot { top: 12px; right: calc(50% - 22px); border-color: var(--surface); }
+
+/* ---------- VIEWS: ซ่อนทุกหน้า แสดงเฉพาะที่มี .active ---------- */
+.view { display: none; }
+.view.active { display: block; }
+[hidden] { display: none !important; }   /* ให้ attribute hidden ซ่อนจริงเสมอ */
+
+/* ---------- 4) SHARED COMPONENTS ---------- */
+.card { background: var(--surface); border: 1px solid var(--line);
+        border-radius: var(--radius); padding: 16px; margin-bottom: 14px; }
+.row-between { display: flex; justify-content: space-between; align-items: center; }
+
+/* ปุ่ม: <button> และลิงก์ที่ใส่ class="btn" หน้าตาเหมือนกัน */
+button, .btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: var(--tap); padding: 0 18px;
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+  background: var(--surface); color: var(--ink);
+  font: inherit; font-weight: 700; text-decoration: none; cursor: pointer;
+}
+.btn.primary { background: var(--sky-400); border-color: var(--sky-400); color: var(--ink); }
+.big  { min-height: 54px; font-size: 1.05rem; }
+.full { width: 100%; margin-top: 8px; }
+button:disabled { opacity: .45; cursor: not-allowed; }
+
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 3px solid var(--sky-700); outline-offset: 2px;
+}
+
+label { display: block; font-weight: 700; margin: 14px 0 4px; }
+input[type="text"], input[type="number"], select {
+  width: 100%; min-height: var(--tap); padding: 8px 12px;
+  font: inherit; color: var(--ink); background: var(--surface);
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+}
+/* JS ใส่ class นี้ให้ช่องที่ไม่ผ่าน validation → FR-1 AC#2 "highlight invalid field" */
+.field-error { border-color: var(--alert) !important; border-width: 2px !important; }
+.error-text { color: var(--alert); font-size: .9rem; margin: 4px 0 0; }
+
+.status { padding: 10px 12px; border-radius: 10px; background: var(--sky-100); margin: 10px 0 0; }
+.status.ok  { color: var(--sky-700); }
+.status.bad { color: var(--alert); background: var(--warn-bg); }
+.empty { text-align: center; color: var(--ink-soft); padding: 24px 0; }
+.plain-list { list-style: none; padding: 0; margin: 0; }
+.plain-list li { padding: 8px 0; border-bottom: 1px solid var(--line); }
+.plain-list li:last-child { border-bottom: 0; }
+details summary { cursor: pointer; min-height: 32px; }
+details button { margin: 6px 6px 0 0; }
+
+.pill { display: inline-block; padding: 4px 12px; border-radius: 999px;
+        background: var(--sky-100); font-size: .85rem; font-weight: 700; }
+.pill.warn { background: var(--warn-bg); color: var(--alert); }
+
+/* ปุ่มเปอร์เซ็นต์ 5 ระดับ */
+.pct-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.pct-btn { padding: 0; min-height: 56px; font-size: 1rem; }
+.pct-btn.selected, .snack-btn.selected { background: var(--sky-400); border-color: var(--sky-700); }
+
+/* ---------- 5) PER-VIEW (ขึ้นต้นด้วย id หน้า กันชนกัน) ---------- */
+
+/* Home: แถบโปรไฟล์แมว */
+#view-home .profile-strip { display: flex; align-items: center; gap: 14px;
+                            text-decoration: none; color: var(--ink); }
+#view-home .avatar { width: 56px; height: 56px; border-radius: 50%; flex: none;
+                     background: var(--sky-100); color: var(--sky-700);
+                     display: flex; align-items: center; justify-content: center; }
+#view-home .avatar .ico { width: 32px; height: 32px; }
+#view-home .ps-text { flex: 1; min-width: 0; }
+#view-home .ps-name { font-size: 1.2rem; font-weight: 700; }
+#view-home .ps-detail { color: var(--ink-soft); font-size: .85rem; }
+#view-home .ps-target { text-align: center; }
+#view-home .ps-target span { display: block; font-size: 1.5rem; font-weight: 700; line-height: 1.1; }
+#view-home .ps-target small { color: var(--ink-soft); font-size: .7rem; }
+
+/* Home: ติดตาม 5 วัน — 5 คอลัมน์ แต่ละคอลัมน์ = ตัวเลข + แท่ง + วันที่ */
+.five-days { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 8px; }
+.day { text-align: center; }
+.day .val { font-size: .85rem; font-weight: 700; min-height: 1.4em; }
+.day .track { position: relative; height: 150px; margin: 4px 0 6px;
+              background: var(--sky-100); border-radius: 10px; overflow: hidden; }
+.day .fill { position: absolute; left: 0; right: 0; bottom: 0; background: var(--sky-400); }
+.day .fill.below { background: var(--warn); }               /* ต่ำกว่าเป้า */
+.day .mark { position: absolute; left: 0; right: 0; border-top: 2px dashed var(--ink); }  /* เส้นเป้าหมาย */
+.day .dlabel { font-size: .75rem; color: var(--ink-soft); line-height: 1.3; }
+.day.today .dlabel { color: var(--ink); font-weight: 700; }
+.day.none .track { background: repeating-linear-gradient(45deg, var(--sky-100), var(--sky-100) 6px, var(--surface) 6px, var(--surface) 12px); }
+
+/* Log */
+#view-log .photo-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+#view-log .photo-preview { display: block; width: 100%; max-height: 240px; object-fit: cover;
+                           border-radius: var(--radius-sm); margin-top: 12px; }
+#view-log #photo-retake { margin-top: 8px; }
+
+/* Snack */
+#view-snack .snack-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+#view-snack .snack-btn { min-height: 56px; }
+
+/* Trend: กล่องกราฟต้องกำหนดความสูง ไม่งั้น Chart.js (responsive) ยืดไม่หยุด */
+#view-trend .chart-box { position: relative; height: 280px; }
+
+/* Alerts */
+.alert-list { list-style: none; padding: 0; margin: 0; }
+.alert-list li { background: var(--surface); border: 1px solid var(--line);
+                 border-left: 6px solid var(--warn); border-radius: var(--radius);
+                 padding: 12px 14px; margin-bottom: 10px; }
+.alert-list .when { color: var(--ink-soft); font-size: .85rem; }

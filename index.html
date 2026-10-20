@@ -1,6 +1,30 @@
-<<<<<<< HEAD
 <!DOCTYPE html>
+<!--
+  MeowMeal – index.html  (App Shell, ออกแบบตามภาพร่างของทีม)
+  ------------------------------------------------------------------
+  แอปหน้าเดียว (Single-Page App): ทุกหน้าเป็น <section> ในไฟล์นี้ มองเห็นทีละ 1 หน้า
+  ตัวสลับหน้าอยู่ใน js/app.js ; เปลี่ยนหน้าด้วยลิงก์แบบ hash เช่น <a href="#trend">
 
+  เลย์เอาต์ตามภาพร่าง:
+    ┌────────────────────────────────────────┐
+    │ [ไอคอนแมว]   🐾 MeowMeal        [🔔]   │ ← แถบบนสีฟ้าอ่อน
+    │ ┌────────────────────────────────────┐ │
+    │ │ แถบโปรไฟล์แมว                       │ │ ← หน้า Home
+    │ └────────────────────────────────────┘ │
+    │ ┌────────────────────────────────────┐ │
+    │ │ ติดตามสถานะ 5 วันล่าสุด              │ │
+    │ └────────────────────────────────────┘ │
+    │ Home   Trend   (📷)   Snack   Alert    │ ← แท็บล่าง ปุ่มกล้องอยู่กลาง
+    └────────────────────────────────────────┘
+
+  แผนที่หน้า ↔ FR:
+    #home     Home                    แสดงผล FR-1 (โปรไฟล์) + สถานะ FR-3 (5 วัน)
+    #trend    Trend                   FR-4
+    #log      Log meal (ปุ่มกล้อง)     FR-5 (ถ่ายรูป/เลือกรูป) + FR-2 (เลือก % เอง)
+    #snack    Snack                   FR-2 (extra snack → isOutlier)
+    #alerts   Alert (+ปุ่มกระดิ่ง)     FR-3
+    #profile  Cat profile & settings  FR-1 (ไอคอนแมวมุมซ้ายบน) + ตั้งค่า
+-->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -8,14 +32,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>MeowMeal</title>
 
-  <!-- ฟอนต์ Quicksand -->
+  <!-- ฟอนต์ Quicksand (กลมๆ เข้ากับธีมแมว) ถ้าโหลดไม่ได้จะใช้ฟอนต์ระบบแทนอัตโนมัติ -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="css/style.css">
 
-  <!-- Chart.js ใช้เฉพาะกราฟ FR-4 -->
+  <!-- Chart.js ใช้เฉพาะกราฟ FR-4 ; @4.4.0 = ล็อกเวอร์ชัน กันเวอร์ชันใหม่ทำกราฟพัง -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
 </head>
 
@@ -23,10 +47,10 @@
   <!-- กรอบมือถือ: มือถือจริง = เต็มจอ / จอคอม = กรอบกว้าง ~420px ตรงกลาง -->
   <div class="phone">
 
-    <!-- แถบบน สีฟ้าอ่อน (อยู่ทุกหน้า)
-         ซ้าย: ไอคอนแมว = หน้าโปรไฟล์ + ตั้งค่า | กลาง: โลโก้ | ขวา: กระดิ่ง = หน้าแจ้งเตือน -->
+    <!-- ===== แถบบน สีฟ้าอ่อน (อยู่ทุกหน้า) =====
+         ซ้าย: ไอคอนแมว → หน้าโปรไฟล์ + ตั้งค่า | กลาง: โลโก้ | ขวา: กระดิ่ง → หน้าแจ้งเตือน -->
     <header class="app-header">
-      <a class="hdr-btn" href="#profile" aria-label="Cat profile and settings">
+      <a class="hdr-btn" href="#profile" aria-label="Cat profile and settings" data-i18n-aria-label="Cat profile and settings">
         <!-- ไอคอนหน้าแมว -->
         <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M4 4l4 3h8l4-3v9a8 8 0 0 1-16 0z"/>
@@ -46,7 +70,7 @@
         MeowMeal
       </a>
 
-      <a class="hdr-btn" href="#alerts" aria-label="Alerts">
+      <a class="hdr-btn" href="#alerts" aria-label="Alerts" data-i18n-aria-label="Alerts">
         <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 21a2 2 0 0 0 4 0"/>
         </svg>
@@ -55,21 +79,22 @@
       </a>
     </header>
 
-    <!-- พื้นที่เนื้อหา: 1 <section> = 1 หน้า -->
+    <!-- ===== พื้นที่เนื้อหา: 1 <section> = 1 หน้า ===== -->
     <main class="content">
 
-      <!--  HOME – FR-1 + FR-3 (Golden Thread)  -->
-      <!-- บน = แถบโปรไฟล์แมว / ล่าง = ติดตามสถานะ 5 วันล่าสุด, ข้อมูลจาก js/home.js -->
+      <!-- ################ HOME ################
+           ตามภาพ: บน = แถบโปรไฟล์แมว / ล่าง = ติดตามสถานะ 5 วันล่าสุด
+           เนื้อหาเติมโดย js/home.js -->
       <section id="view-home" class="view" data-tab="home">
 
-        <!-- ถ้ายังไม่มีโปรไฟล์จะโชว์กล่องนี้แทน -->
+        <!-- ยังไม่มีโปรไฟล์ → โชว์กล่องนี้แทน -->
         <div id="home-empty" class="card" hidden>
-          <h2>Welcome to MeowMeal</h2>
-          <p class="muted">Add your cat's profile to start tracking recovery meals.</p>
-          <a class="btn primary" href="#profile">Add cat profile</a>
+          <h2 data-i18n="Welcome to MeowMeal">Welcome to MeowMeal</h2>
+          <p class="muted" data-i18n="Add your cat's profile to start tracking recovery meals.">Add your cat's profile to start tracking recovery meals.</p>
+          <a class="btn primary" href="#profile" data-i18n="Add cat profile">Add cat profile</a>
         </div>
 
-        <!-- แถบโปรไฟล์แมว (FR-1): กดแล้วไปแก้ไขได้ -->
+        <!-- แถบโปรไฟล์แมว (ผล FR-1): กดแล้วไปแก้ไขได้ -->
         <a id="home-profile" class="card profile-strip" href="#profile" hidden>
           <div class="avatar" aria-hidden="true">
             <svg class="ico" viewBox="0 0 24 24">
@@ -85,64 +110,64 @@
           </div>
           <div class="ps-target">
             <span id="home-target">–</span>
-            <small>daily target</small>
+            <small data-i18n="daily target">daily target</small>
           </div>
         </a>
 
         <!-- การ์ดติดตาม 5 วันล่าสุด (สถานะของ FR-3) : JS สร้างคอลัมน์ 5 วันใส่ #five-days -->
         <div id="home-tracker" class="card" hidden>
           <div class="row-between">
-            <h2>Last 5 days</h2>
+            <h2 data-i18n="Last 5 days">Last 5 days</h2>
             <span id="home-streak" class="pill">–</span>
           </div>
           <div id="five-days" class="five-days"></div>
-          <p class="hint">Bars show how much was eaten. The dashed line is the daily target.</p>
+          <p class="hint" data-i18n="Bars show how much was eaten. The dashed line is the daily target.">Bars show how much was eaten. The dashed line is the daily target.</p>
         </div>
       </section>
 
-      <!-- TREND – FR-4 -->
+      <!-- ################ TREND – FR-4 ################ -->
       <section id="view-trend" class="view" data-tab="trend">
-        <h1>Recovery trend</h1>
-        <p class="muted">Last 30 days. Show this to your vet at the next visit.</p>
+        <h1 data-i18n="Recovery trend">Recovery trend</h1>
+        <p class="muted" data-i18n="Last 30 days. Show this to your vet at the next visit.">Last 30 days. Show this to your vet at the next visit.</p>
         <div class="card">
           <!-- กล่องครอบ canvas ต้องกำหนดความสูง ไม่งั้น Chart.js ยืดไม่หยุด -->
           <div class="chart-box" id="trend-chart-box">
             <canvas id="recoveryChart"></canvas>
           </div>
           <!-- Empty state ตาม FR-4 AC#2 : ข้อความต้องเป็น "No logs available" -->
-          <p id="trend-empty" class="empty" hidden>No logs available</p>
+          <p id="trend-empty" class="empty" data-i18n="No logs available" hidden>No logs available</p>
         </div>
       </section>
 
-      <!-- LOG MEAL (ปุ่มกล้องตรงกลาง) – FR-5 + FR-2 
-           กดปุ่มกล้อง = ถ่ายรูป/เลือกรูป -> ถ่ายใหม่ได้ -> มีปุ่ม Log meal
+      <!-- ################ LOG MEAL (ปุ่มกล้องกลาง) – FR-5 + FR-2 ################
+           ตามภาพ: กดปุ่มกล้อง → ถ่ายรูป/เลือกรูป → ถ่ายใหม่ได้ → มีปุ่ม Log meal
            ถ้าไม่อยากถ่ายรูป ก็เลือก % เองได้ (FR-2: ไม่พึ่งกล้องอย่างเดียว) -->
       <section id="view-log" class="view" data-tab="log">
-        <h1>Log a meal</h1>
+        <h1 data-i18n="Log a meal">Log a meal</h1>
 
         <!-- ส่วนที่ 1: รูปชามอาหาร (FR-5) -->
         <div class="card">
-          <h2>Bowl photo <span class="muted">(optional)</span></h2>
+          <h2><span data-i18n="Bowl photo">Bowl photo</span> <span class="muted" data-i18n="(optional)">(optional)</span></h2>
 
           <div class="photo-actions">
-            <button id="photo-take" type="button">Take photo</button>
-            <button id="photo-pick" type="button">Choose photo</button>
+            <button id="photo-take" type="button" data-i18n="Take photo">Take photo</button>
+            <button id="photo-pick" type="button" data-i18n="Choose photo">Choose photo</button>
           </div>
           <!-- input ไฟล์ซ่อนไว้ แล้วให้ปุ่มด้านบนสั่งเปิดแทน
                capture="environment" = บนมือถือเปิดกล้องหลังทันที -->
           <input id="photo-camera"  type="file" accept="image/*" capture="environment" hidden>
           <input id="photo-gallery" type="file" accept="image/*" hidden>
 
-          <img id="photo-preview" class="photo-preview" alt="Preview of the bowl photo" hidden>
+          <img id="photo-preview" class="photo-preview" alt="Preview of the bowl photo" data-i18n-alt="Preview of the bowl photo" hidden>
           <p id="photo-status" class="status" hidden></p>
-          <button id="photo-retake" type="button" hidden>Retake photo</button>
+          <button id="photo-retake" type="button" data-i18n="Retake photo" hidden>Retake photo</button>
         </div>
 
         <!-- ส่วนที่ 2: ปริมาณที่เหลือ (FR-2) — ถ้ามีผลจากรูป จะเลือกไว้ให้ แล้วแก้เองได้ -->
         <div class="card">
-          <h2>Amount left in the bowl</h2>
+          <h2 data-i18n="Amount left in the bowl">Amount left in the bowl</h2>
           <!-- data-pct = ค่าที่จะบันทึก ; ปุ่มสูง >= 44px เผื่อมือเปื้อนอาหาร -->
-          <div class="pct-grid" id="log-pct-grid" role="group" aria-label="Amount left">
+          <div class="pct-grid" id="log-pct-grid" role="group" aria-label="Amount left" data-i18n-aria-label="Amount left">
             <button type="button" class="pct-btn" data-pct="0">0%</button>
             <button type="button" class="pct-btn" data-pct="25">25%</button>
             <button type="button" class="pct-btn" data-pct="50">50%</button>
@@ -150,134 +175,133 @@
             <button type="button" class="pct-btn" data-pct="100">100%</button>
           </div>
 
-          <label for="log-diet">Prescription diet</label>
+          <label for="log-diet" data-i18n="Prescription diet">Prescription diet</label>
           <select id="log-diet">
-            <option>Recovery wet</option>
-            <option>Renal diet</option>
-            <option>Gastrointestinal</option>
-            <option>Other</option>
+            <option value="Recovery wet" data-i18n="Recovery wet">Recovery wet</option>
+            <option value="Renal diet" data-i18n="Renal diet">Renal diet</option>
+            <option value="Gastrointestinal" data-i18n="Gastrointestinal">Gastrointestinal</option>
+            <option value="Other" data-i18n="Other">Other</option>
           </select>
         </div>
 
         <p id="log-status" class="status" hidden></p>
         <!-- disabled จนกว่าจะเลือก % (JS เปิดให้) -->
-        <button id="log-confirm" class="btn primary big full" type="button" disabled>Log meal</button>
+        <button id="log-confirm" class="btn primary big full" type="button" data-i18n="Log meal" disabled>Log meal</button>
       </section>
 
-      <!-- SNACK – FR-2 (extra snack)
+      <!-- ################ SNACK – FR-2 (extra snack) ################
            ขนมนอกมื้อ: บันทึกแยก ติด isOutlier = true → ไม่นับใน baseline ของ FR-3 -->
       <section id="view-snack" class="view" data-tab="snack">
-        <h1>Extra snack</h1>
-        <p class="muted">Snacks are saved separately. They don't count toward the daily target or the alert.</p>
+        <h1 data-i18n="Extra snack">Extra snack</h1>
+        <p class="muted" data-i18n="Snacks are saved separately. They don't count toward the daily target or the alert.">Snacks are saved separately. They don't count toward the daily target or the alert.</p>
 
         <div class="card">
-          <h2>What did your cat get?</h2>
-          <div class="snack-grid" id="snack-grid" role="group" aria-label="Snack type">
-            <button type="button" class="snack-btn" data-snack="Treat">Treat</button>
-            <button type="button" class="snack-btn" data-snack="Tuna or topper">Tuna or topper</button>
-            <button type="button" class="snack-btn" data-snack="Human food">Human food</button>
-            <button type="button" class="snack-btn" data-snack="Other">Other</button>
+          <h2 data-i18n="What did your cat get?">What did your cat get?</h2>
+          <div class="snack-grid" id="snack-grid" role="group" aria-label="Snack type" data-i18n-aria-label="Snack type">
+            <button type="button" class="snack-btn" data-snack="Treat" data-i18n="Treat">Treat</button>
+            <button type="button" class="snack-btn" data-snack="Tuna or topper" data-i18n="Tuna or topper">Tuna or topper</button>
+            <button type="button" class="snack-btn" data-snack="Human food" data-i18n="Human food">Human food</button>
+            <button type="button" class="snack-btn" data-snack="Other" data-i18n="Other">Other</button>
           </div>
           <p id="snack-status" class="status" hidden></p>
-          <button id="snack-confirm" class="btn primary big full" type="button" disabled>Log snack</button>
+          <button id="snack-confirm" class="btn primary big full" type="button" data-i18n="Log snack" disabled>Log snack</button>
         </div>
 
         <div class="card">
-          <h2>Today</h2>
+          <h2 data-i18n="Today">Today</h2>
           <ul id="snack-list" class="plain-list"></ul>
-          <p id="snack-empty" class="muted">No snacks logged today</p>
+          <p id="snack-empty" class="muted" data-i18n="No snacks logged today">No snacks logged today</p>
         </div>
       </section>
 
-      <!-- ALERTS – FR-3 (Golden Thread) -->
+      <!-- ################ ALERTS – FR-3 (Golden Thread) ################ -->
       <section id="view-alerts" class="view" data-tab="alerts">
-        <h1>Alerts</h1>
+        <h1 data-i18n="Alerts">Alerts</h1>
         <div class="card">
-          <p class="muted">An alert is created when intake stays below target for 5 days in a row.</p>
+          <p class="muted" data-i18n="An alert is created when intake stays below target for 5 days in a row.">An alert is created when intake stays below target for 5 days in a row.</p>
           <!-- ระบบจริงรัน job นี้ฝั่ง server ทุกเที่ยงคืน (NFR-2)
                prototype มีปุ่มให้กดรันเองเพื่อสาธิต -->
-          <button id="btn-run-check" class="btn full" type="button">Run daily check now (demo)</button>
+          <button id="btn-run-check" class="btn full" type="button" data-i18n="Run daily check now (demo)">Run daily check now (demo)</button>
           <p id="alerts-status" class="status" hidden></p>
         </div>
         <ul id="alerts-list" class="alert-list"></ul>
-        <p id="alerts-empty" class="empty" hidden>No alerts yet</p>
+        <p id="alerts-empty" class="empty" data-i18n="No alerts yet" hidden>No alerts yet</p>
       </section>
 
-      <!-- CAT PROFILE & SETTINGS – FR-1
+      <!-- ################ CAT PROFILE & SETTINGS – FR-1 ################
            ตามภาพ: ไอคอนมุมซ้ายบน = "มีหน้าโปรไฟล์, setting" จึงรวมไว้หน้าเดียวกัน -->
       <section id="view-profile" class="view" data-tab="">
-        <h1>Cat profile</h1>
+        <h1 data-i18n="Cat profile">Cat profile</h1>
 
         <!-- novalidate: ปิดตัวตรวจของเบราว์เซอร์ เพื่อให้เราโชว์ error เองตาม FR-1 AC#2 -->
         <form id="profile-form" class="card" novalidate>
-          <label for="pf-name">Name</label>
+          <label for="pf-name" data-i18n="Name">Name</label>
           <input id="pf-name" type="text" autocomplete="off">
           <!-- ข้อความ error ใต้แต่ละช่อง: JS ใส่ข้อความ + เอา hidden ออก + ใส่ .field-error ให้ช่อง -->
           <p class="error-text" id="pf-name-err" hidden></p>
 
-          <label for="pf-age">Age (years)</label>
+          <label for="pf-age" data-i18n="Age (years)">Age (years)</label>
           <input id="pf-age" type="number" inputmode="decimal" min="0" step="0.5">
           <p class="error-text" id="pf-age-err" hidden></p>
 
-          <label for="pf-weight">Weight (kg)</label>
+          <label for="pf-weight" data-i18n="Weight (kg)">Weight (kg)</label>
           <input id="pf-weight" type="number" inputmode="decimal" min="0" step="0.1">
           <p class="error-text" id="pf-weight-err" hidden></p>
 
-          <label for="pf-diagnosis">Diagnosis context</label>
-          <input id="pf-diagnosis" type="text" placeholder="e.g. post-op recovery">
+          <label for="pf-diagnosis" data-i18n="Diagnosis context">Diagnosis context</label>
+          <input id="pf-diagnosis" type="text" placeholder="e.g. post-op recovery" data-i18n-placeholder="e.g. post-op recovery">
           <p class="error-text" id="pf-diagnosis-err" hidden></p>
 
-          <label for="pf-target">Daily intake target (% of each meal)</label>
+          <label for="pf-target" data-i18n="Daily intake target (% of each meal)">Daily intake target (% of each meal)</label>
           <input id="pf-target" type="number" inputmode="numeric" min="1" max="100" step="1">
-          <p class="hint">Prototype assumption: the share of the meal your vet wants eaten.</p>
+          <p class="hint" data-i18n="Prototype assumption: the share of the meal your vet wants eaten.">Prototype assumption: the share of the meal your vet wants eaten.</p>
           <p class="error-text" id="pf-target-err" hidden></p>
 
-          <button class="btn primary big full" type="submit">Save profile</button>
+          <button class="btn primary big full" type="submit" data-i18n="Save profile">Save profile</button>
         </form>
 
-        <h1>Settings</h1>
+        <h1 data-i18n="Settings">Settings</h1>
         <div class="card">
-          <label for="set-lang">Language</label>
-          <!-- SRS ระบุ English + Thai : ตอนนี้ยังไม่แปลจริง จึง disable ภาษาไทยไว้ก่อน -->
+          <label for="set-lang" data-i18n="Language">Language</label>
           <select id="set-lang">
             <option value="en">English</option>
-            <option value="th" disabled>ไทย (coming soon)</option>
+            <option value="th">ไทย</option>
           </select>
         </div>
 
         <div class="card">
-          <h2>About</h2>
+          <h2 data-i18n="About">About</h2>
           <p class="muted">
-            MeowMeal is not a diagnostic tool and does not replace a veterinary exam.
-            If your cat shows abnormal symptoms, please consult a veterinarian.
+            <span data-i18n="MeowMeal is not a diagnostic tool and does not replace a veterinary exam. If your cat shows abnormal symptoms, please consult a veterinarian.">MeowMeal is not a diagnostic tool and does not replace a veterinary exam.
+            If your cat shows abnormal symptoms, please consult a veterinarian.</span>
           </p>
         </div>
 
         <!-- เครื่องมือสำหรับสาธิต/ทดสอบ (ไม่ใช่ฟีเจอร์จริงของแอป) -->
         <details class="card">
-          <summary><strong>Demo tools</strong></summary>
-          <p class="muted">Fills the app with 30 days of sample data. The last 5 days are below target.</p>
-          <button id="btn-sample" type="button">Load sample data</button>
-          <button id="btn-reset" type="button">Clear all data</button>
+          <summary><strong data-i18n="Demo tools">Demo tools</strong></summary>
+          <p class="muted" data-i18n="Fills the app with 30 days of sample data. The last 5 days are below target.">Fills the app with 30 days of sample data. The last 5 days are below target.</p>
+          <button id="btn-sample" type="button" data-i18n="Load sample data">Load sample data</button>
+          <button id="btn-reset" type="button" data-i18n="Clear all data">Clear all data</button>
         </details>
       </section>
 
     </main>
 
-    <!-- แท็บล่าง: ปุ่มพร้อมชื่อ + ปุ่มกล้องกลาง (ตามภาพ)
+    <!-- ===== แท็บล่าง: ปุ่มพร้อมชื่อ + ปุ่มกล้องกลาง (ตามภาพ) =====
          data-tab ต้องตรงกับ data-tab ของ <section> เพื่อไฮไลต์ถูกปุ่ม -->
-    <nav class="tabbar" aria-label="Main">
+    <nav class="tabbar" aria-label="Main" data-i18n-aria-label="Main">
       <a class="tab" href="#home" data-tab="home">
         <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/></svg>
-        <span>Home</span>
+        <span data-i18n="Home">Home</span>
       </a>
       <a class="tab" href="#trend" data-tab="trend">
         <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l5-6 4 3 5-8 4 5"/></svg>
-        <span>Trend</span>
+        <span data-i18n="Trend">Trend</span>
       </a>
 
       <!-- ปุ่มกล้องกลาง: ลอยเด่นกว่าปุ่มอื่น พื้นสีฟ้าอ่อนตามภาพ -->
-      <a class="cam" href="#log" data-tab="log" aria-label="Log a meal with a photo">
+      <a class="cam" href="#log" data-tab="log" aria-label="Log a meal with a photo" data-i18n-aria-label="Log a meal with a photo">
         <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>
         </svg>
@@ -289,67 +313,37 @@
           <path d="M3 12c3-5 9-6 13-2l5-3v10l-5-3c-4 4-10 3-13-2z"/>
           <circle cx="8" cy="11.5" r=".8" fill="currentColor"/>
         </svg>
-        <span>Snack</span>
+        <span data-i18n="Snack">Snack</span>
       </a>
       <a class="tab" href="#alerts" data-tab="alerts">
         <svg class="ico" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M12 4l9 16H3z"/><path d="M12 10v4"/><circle cx="12" cy="17" r=".8" fill="currentColor"/>
         </svg>
-        <span>Alert</span>
+        <span data-i18n="Alert">Alert</span>
         <span id="tab-alert-dot" class="dot" hidden></span>
       </a>
     </nav>
 
   </div><!-- /.phone -->
 
-  
+  <!-- ===== สคริปต์ =====
+       ลำดับสำคัญ: ไฟล์ที่ถูกเรียกใช้ต้องโหลดก่อนไฟล์ที่เรียกใช้มัน
+         1) storage.js + anomaly_detector.js = เครื่องมือกลาง
+         2) app.js                           = สร้างตัวแปร App (ไฟล์หน้าต่างๆ เรียก App.register)
+         3) ไฟล์ของแต่ละหน้า                 = ลงทะเบียนตัวเองกับ App
+            (log.js ต้องมาก่อน photo.js เพราะ photo.js เรียกใช้ LogMeal ของ log.js)
+       app.js เริ่มทำงานจริงตอนโหลดครบทุกสคริปต์ (DOMContentLoaded) จึงอยู่ก่อนไฟล์หน้าต่างๆ ได้ -->
   <script src="js/storage.js"></script>
   <script src="js/anomaly_detector.js"></script>
+  <script src="js/i18n.js"></script>
   <script src="js/app.js"></script>
 
   <script src="js/home.js"></script>
   <script src="js/trend_dashboard.js"></script>  <!-- Pattarawat FR-4 -->
-  <script src="js/log.js"></script>              <!-- Puree FR-2 -->
+  <script src="js/meal_log.js"></script>         <!-- Puree FR-2 -->
   <script src="js/photo.js"></script>            <!-- Korawit FR-5 -->
   <script src="js/snack.js"></script>
   <script src="js/alerts.js"></script>           <!-- Parewa FR-3 -->
   <script src="js/profile.js"></script>          <!-- Puree FR-1 -->
 </body>
-=======
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MeowMeal - FR-4 Recovery Trend Dashboard</title>
-    <!-- Chart.js CDN Link -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f9fafb;
-        }
-        .dashboard-container {
-            width: 90%;
-            max-width: 900px;
-            margin: 0 auto;
-            background: #ffffff;
-            padding: 24px;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-    </style>
-</head>
-<body>
-
-    <div class="dashboard-container">
-        <h2>MeowMeal: Feline Historical Recovery Trend (FR-4)</h2>
-        <canvas id="recoveryChart" width="800" height="400"></canvas>
-    </div>
-
-    <!-- Script Importation -->
-    <script src="dashboard.js"></script>
-</body>
->>>>>>> edf29aa (add empty state support for FR-4 dashboard)
 </html>
