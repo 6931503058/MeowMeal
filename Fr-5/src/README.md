@@ -1,8 +1,8 @@
 ## FR-5: AI Portion demo
 
 This standalone, framework-free JavaScript demo uses native browser modules.
-Serve the repository root with a local static web server and open `index.html` to
-try the AI Portion flow. The analysis is mocked in `Fr-5/src/portion-analysis.mjs`.
+Serve the repository root with a local static web server and open `Fr-5/index.html`
+to try the AI Portion flow. The analysis is mocked in `Fr-5/src/portion-analysis.mjs`.
 A selected image is previewed locally and is not sent to a server or external AI
 service in demo mode.
 
