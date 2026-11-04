@@ -331,7 +331,7 @@
          1) storage.js + anomaly_detector.js = เครื่องมือกลาง
          2) app.js                           = สร้างตัวแปร App (ไฟล์หน้าต่างๆ เรียก App.register)
          3) ไฟล์ของแต่ละหน้า                 = ลงทะเบียนตัวเองกับ App
-            (log.js ต้องมาก่อน photo.js เพราะ photo.js เรียกใช้ LogMeal ของ log.js)
+            (meal_log.js ต้องมาก่อน photo.js เพราะ photo.js เรียกใช้ LogMeal ของ meal_log.js)
        app.js เริ่มทำงานจริงตอนโหลดครบทุกสคริปต์ (DOMContentLoaded) จึงอยู่ก่อนไฟล์หน้าต่างๆ ได้ -->
   <script src="js/storage.js"></script>
   <script src="js/anomaly_detector.js"></script>
