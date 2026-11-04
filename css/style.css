@@ -35,10 +35,33 @@ body {
   color: var(--ink);
   line-height: 1.5;
 }
-h1 { font-size: 1.5rem; margin: 4px 0 12px; }
-h2 { font-size: 1.1rem; margin: 0 0 10px; }
+
+/* ภาษาไทยใช้ Mitr ซึ่งมีทรงมนเข้ากับ Quicksand
+   ลดขนาดและน้ำหนักเล็กน้อย พร้อมเพิ่มระยะบรรทัดให้อ่านสบาย */
+html:lang(th) body {
+  /* วาง Mitr ก่อน เพื่อให้ตัวเลขและเครื่องหมายในข้อความไทยใช้ชุดเดียวกัน */
+  font-family: "Mitr", "Quicksand", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: .98rem;
+  line-height: 1.65;
+}
+html:lang(th) h1 { font-size: 1.4rem; font-weight: 500; line-height: 1.45; }
+html:lang(th) h2 { font-size: 1.05rem; font-weight: 500; line-height: 1.5; }
+html:lang(th) .hint,
+html:lang(th) .muted,
+html:lang(th) .ps-detail { line-height: 1.65; }
+html:lang(th) .tab { font-size: .8rem; line-height: 1.35; }
+html:lang(th) label,
+html:lang(th) button,
+html:lang(th) .btn { font-weight: 500; }
+/* ตัวเลขและ % ใช้กับข้อความไทย: ลดน้ำหนักให้ไม่เด่นกว่าตัวอักษร */
+html:lang(th) #home-target,
+html:lang(th) .day .val,
+html:lang(th) .pct-btn,
+html:lang(th) .pill { font-weight: 500; }
+h1 { font-size: 1.5rem; font-weight: 600; margin: 4px 0 12px; }
+h2 { font-size: 1.1rem; font-weight: 600; margin: 0 0 10px; }
 p  { margin: 0 0 12px; }
-a  { color: var(--sky-700); font-weight: 700; }
+a  { color: var(--sky-700); font-weight: 600; }
 .muted { color: var(--ink-soft); }
 .hint  { color: var(--ink-soft); font-size: .85rem; margin: 8px 0 0; }
 
@@ -87,7 +110,7 @@ a  { color: var(--sky-700); font-weight: 700; }
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
   text-decoration: none; color: var(--ink-soft); font-size: .75rem; font-weight: 500;
 }
-.tab.active { color: var(--sky-700); font-weight: 700; }
+.tab.active { color: var(--sky-700); font-weight: 600; }
 .tab.active::before { content: ""; position: absolute; top: 0; width: 28px; height: 3px;
                       border-radius: 0 0 3px 3px; background: var(--sky-700); }
 
@@ -123,7 +146,7 @@ button, .btn {
   min-height: var(--tap); padding: 0 18px;
   border: 1px solid var(--line); border-radius: var(--radius-sm);
   background: var(--surface); color: var(--ink);
-  font: inherit; font-weight: 700; text-decoration: none; cursor: pointer;
+  font: inherit; font-weight: 600; text-decoration: none; cursor: pointer;
 }
 .btn.primary { background: var(--sky-400); border-color: var(--sky-400); color: var(--ink); }
 .big  { min-height: 54px; font-size: 1.05rem; }
@@ -134,7 +157,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
   outline: 3px solid var(--sky-700); outline-offset: 2px;
 }
 
-label { display: block; font-weight: 700; margin: 14px 0 4px; }
+label { display: block; font-weight: 600; margin: 14px 0 4px; }
 input[type="text"], input[type="number"], select {
   width: 100%; min-height: var(--tap); padding: 8px 12px;
   font: inherit; color: var(--ink); background: var(--surface);
@@ -155,7 +178,7 @@ details summary { cursor: pointer; min-height: 32px; }
 details button { margin: 6px 6px 0 0; }
 
 .pill { display: inline-block; padding: 4px 12px; border-radius: 999px;
-        background: var(--sky-100); font-size: .85rem; font-weight: 700; }
+        background: var(--sky-100); font-size: .85rem; font-weight: 600; }
 .pill.warn { background: var(--warn-bg); color: var(--alert); }
 
 /* ปุ่มเปอร์เซ็นต์ 5 ระดับ */
@@ -173,23 +196,23 @@ details button { margin: 6px 6px 0 0; }
                      display: flex; align-items: center; justify-content: center; }
 #view-home .avatar .ico { width: 32px; height: 32px; }
 #view-home .ps-text { flex: 1; min-width: 0; }
-#view-home .ps-name { font-size: 1.2rem; font-weight: 700; }
+#view-home .ps-name { font-size: 1.2rem; font-weight: 600; }
 #view-home .ps-detail { color: var(--ink-soft); font-size: .85rem; }
 #view-home .ps-target { text-align: center; }
-#view-home .ps-target span { display: block; font-size: 1.5rem; font-weight: 700; line-height: 1.1; }
+#view-home .ps-target span { display: block; font-size: 1.5rem; font-weight: 600; line-height: 1.1; }
 #view-home .ps-target small { color: var(--ink-soft); font-size: .7rem; }
 
 /* Home: ติดตาม 5 วัน — 5 คอลัมน์ แต่ละคอลัมน์ = ตัวเลข + แท่ง + วันที่ */
 .five-days { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 8px; }
 .day { text-align: center; }
-.day .val { font-size: .85rem; font-weight: 700; min-height: 1.4em; }
+.day .val { font-size: .85rem; font-weight: 600; min-height: 1.4em; }
 .day .track { position: relative; height: 150px; margin: 4px 0 6px;
               background: var(--sky-100); border-radius: 10px; overflow: hidden; }
 .day .fill { position: absolute; left: 0; right: 0; bottom: 0; background: var(--sky-400); }
 .day .fill.below { background: var(--warn); }               /* ต่ำกว่าเป้า */
 .day .mark { position: absolute; left: 0; right: 0; border-top: 2px dashed var(--ink); }  /* เส้นเป้าหมาย */
 .day .dlabel { font-size: .75rem; color: var(--ink-soft); line-height: 1.3; }
-.day.today .dlabel { color: var(--ink); font-weight: 700; }
+.day.today .dlabel { color: var(--ink); font-weight: 600; }
 .day.none .track { background: repeating-linear-gradient(45deg, var(--sky-100), var(--sky-100) 6px, var(--surface) 6px, var(--surface) 12px); }
 
 /* Log */
