@@ -1,17 +1,40 @@
-
+/* =====================================================================
+   storage.js – MeowStore: ที่เก็บข้อมูลของแอป (localStorage)
+   ฉบับแยกข้อมูลตามบัญชี: ทุก key ต่อท้ายด้วย id ของผู้ใช้ที่ล็อกอินอยู่
+   เช่น  meowmeal_profile__u-1728000000000
+   ผู้ใช้คนใหม่ยังไม่มี key ของตัวเอง → ได้ค่าว่าง (null / []) ไม่เห็นข้อมูลของคนอื่น
+   ===================================================================== */
 const MeowStore = (() => {
 
-  // ชื่อ key ที่ใช้เก็บใน localStorage (รวมไว้ที่เดียว จะได้ไม่พิมพ์ผิด)
-  const KEYS = {
+  // key เดียวกับที่ js/login.js เขียนไว้ตอนล็อกอิน: { userId, username }
+  const SESSION_KEY = 'meowmeal_session';
+
+  // ชื่อ key ฐาน (ยังไม่ต่อท้ายผู้ใช้) รวมไว้ที่เดียว จะได้ไม่พิมพ์ผิด
+  const BASE = {
     profile: 'meowmeal_profile',
     logs:    'meowmeal_logs',
     alerts:  'meowmeal_alerts'
   };
 
-  // อ่านค่า: ถ้าไม่มี หรืออ่านไม่ได้ ให้คืนค่า fallback แทนที่จะให้แอปพัง
-  function read(key, fallback) {
+  // id ของผู้ใช้ที่ล็อกอินอยู่ (อ่านสดทุกครั้ง ไม่เก็บค้างในตัวแปร → สลับบัญชีแล้วตามทันที)
+  function currentUserId() {
     try {
-      const raw = localStorage.getItem(key);
+      const s = JSON.parse(localStorage.getItem(SESSION_KEY));
+      return (s && s.userId) || null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // ชื่อ key จริงของผู้ใช้ปัจจุบัน ; ถ้ายังไม่ล็อกอินใช้ 'guest' (แยกจากทุกบัญชีจริง)
+  function keyFor(name) {
+    return BASE[name] + '__' + (currentUserId() || 'guest');
+  }
+
+  // อ่านค่า: ถ้าไม่มี หรืออ่านไม่ได้ ให้คืนค่า fallback แทนที่จะให้แอปพัง
+  function read(name, fallback) {
+    try {
+      const raw = localStorage.getItem(keyFor(name));
       return raw ? JSON.parse(raw) : fallback;
     } catch (e) {
       return fallback;
@@ -19,9 +42,9 @@ const MeowStore = (() => {
   }
 
   // เขียนค่า: คืน true ถ้าสำเร็จ / false ถ้าไม่สำเร็จ (เช่น พื้นที่เต็ม)
-  function write(key, value) {
+  function write(name, value) {
     try {
-      localStorage.setItem(key, JSON.stringify(value));
+      localStorage.setItem(keyFor(name), JSON.stringify(value));
       return true;
     } catch (e) {
       return false;
@@ -32,29 +55,29 @@ const MeowStore = (() => {
   const eatenPct = (log) => (log.remainingPct == null ? null : 100 - log.remainingPct);
 
   /* ---- Profile (FR-1) ---- */
-  const getProfile  = () => read(KEYS.profile, null);   // null = ยังไม่เคยสร้าง
-  const saveProfile = (p) => write(KEYS.profile, p);
+  const getProfile  = () => read('profile', null);   // null = ผู้ใช้นี้ยังไม่เคยสร้าง
+  const saveProfile = (p) => write('profile', p);
 
   /* ---- Meal logs (FR-2 เขียน / FR-3, FR-4 อ่าน) ---- */
-  const getLogs = () => read(KEYS.logs, []);
+  const getLogs = () => read('logs', []);
   function addLog(log) {
     const logs = getLogs();
     // id สร้างจากเวลา + ตัวสุ่ม เพื่อให้ไม่ซ้ำกัน
     const id = Date.now() + '-' + Math.random().toString(36).slice(2, 7);
     logs.push({ id, ...log });
-    return write(KEYS.logs, logs);
+    return write('logs', logs);
   }
 
   /* ---- Alerts (FR-3) ---- */
-  const getAlerts  = () => read(KEYS.alerts, []);
-  const saveAlerts = (a) => write(KEYS.alerts, a);
+  const getAlerts  = () => read('alerts', []);
+  const saveAlerts = (a) => write('alerts', a);
 
-  // ล้างข้อมูลทั้งหมด (ปุ่ม Clear all data)
+  // ล้างข้อมูล "ของผู้ใช้ที่ล็อกอินอยู่เท่านั้น" (ไม่แตะบัญชีผู้ใช้ และไม่แตะข้อมูลของคนอื่น)
   function clearAll() {
-    Object.values(KEYS).forEach(k => localStorage.removeItem(k));
+    Object.keys(BASE).forEach(name => localStorage.removeItem(keyFor(name)));
   }
 
-  /* ---- ข้อมูลตัวอย่างสำหรับสาธิต ----
+  /* ---- ข้อมูลตัวอย่างสำหรับสาธิต (เขียนให้ผู้ใช้ปัจจุบัน) ----
      30 วัน: 25 วันแรกกินปกติ (เหลือ 25% → กิน 75%) แล้ว 5 วันสุดท้ายกินน้อย (เหลือ 75% → กิน 25%)
      เป้าหมาย 70% → 5 วันท้ายต่ำกว่าเป้า จึงทำให้ FR-3 เตือน */
   function loadSampleData() {
@@ -79,7 +102,7 @@ const MeowStore = (() => {
         isOutlier: false
       });
     }
-    write(KEYS.logs, logs);
+    write('logs', logs);
     saveAlerts([]);                              // เริ่มโดยยังไม่มี alert (ให้กดตรวจเองตอนสาธิต)
   }
 
