@@ -64,6 +64,11 @@ const App = (() => {
   // เริ่มแอป: init() ทุกไฟล์ → ฟัง hashchange → แสดงหน้าแรก
   function start() {
     Object.values(views).forEach(list => list.forEach(v => { if (v.init) v.init(); }));
+    I18n.apply();
+    document.getElementById('set-lang').addEventListener('change', event => {
+      I18n.setLanguage(event.target.value);
+    });
+    document.addEventListener('languagechange', refresh);
     window.addEventListener('hashchange', route);
     route();
   }

@@ -48,7 +48,7 @@ App.register('log', {
       // ต้องมีโปรไฟล์แมวก่อน ไม่งั้นบันทึกให้ใครไม่ได้
       if (!MeowStore.getProfile()) {
         status.className = 'status bad';
-        status.textContent = "Add your cat's profile first (cat icon, top left).";
+        I18n.setText(status, "Add your cat's profile first (cat icon, top left).");
         return;
       }
       if (LogMeal.getPct() === null) return;   // ปุ่มถูก disable อยู่แล้ว แต่กันไว้อีกชั้น
@@ -63,7 +63,7 @@ App.register('log', {
       });
 
       status.className = saved ? 'status ok' : 'status bad';
-      status.textContent = saved ? 'Meal saved.' : 'Could not save. Browser storage may be full.';
+      I18n.setText(status, saved ? 'Meal saved.' : 'Could not save. Browser storage may be full.');
       if (saved) setTimeout(() => { location.hash = '#home'; }, 600);   // ให้เห็นข้อความแป๊บหนึ่ง
     });
   },

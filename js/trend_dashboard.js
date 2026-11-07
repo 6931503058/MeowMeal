@@ -47,14 +47,14 @@ App.register('trend', {
     // ชุดข้อมูล: แท่ง = % ที่กิน ; เส้น = เป้าหมาย (ถ้ามีโปรไฟล์)
     const datasets = [{
       type: 'bar',
-      label: 'Eaten (%)',
+      label: I18n.t('Eaten (%)'),
       data: data,
       backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--primary').trim()
     }];
     if (profile) {
       datasets.push({
         type: 'line',
-        label: 'Target (%)',
+        label: I18n.t('Target (%)'),
         data: keys.map(() => profile.dailyTarget),   // เส้นแนวนอนค่าคงที่
         borderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent').trim(),
         borderWidth: 2,
@@ -68,7 +68,7 @@ App.register('trend', {
         responsive: true,
         maintainAspectRatio: false,          // ให้สูงตามกล่อง .chart-box (280px)
         scales: {
-          y: { min: 0, max: 100, title: { display: true, text: '% eaten' } },
+          y: { min: 0, max: 100, title: { display: true, text: I18n.t('% eaten') } },
           x: { ticks: { maxTicksLimit: 8 } } // ไม่ให้วันที่แน่นเกินบนจอมือถือ
         }
       }

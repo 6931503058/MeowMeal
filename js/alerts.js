@@ -16,7 +16,7 @@ App.register('alerts', {
 
       // ยังไม่มีโปรไฟล์ → ตรวจไม่ได้ (ไม่รู้เป้าหมาย)
       if (!profile) {
-        status.textContent = 'Add a cat profile first.';
+        I18n.setText(status, 'Add a cat profile first.');
         status.classList.add('bad');
         return;
       }
@@ -24,7 +24,10 @@ App.register('alerts', {
       const result = detectAnomaly(logs, profile);
 
       if (!result.triggered) {
-        status.textContent = 'No alert. Days below target in a row: ' + result.streak + ' of ' + ALERT_STREAK_DAYS + '.';
+        I18n.setText(status, 'No alert. Days below target in a row: {streak} of {days}.', {
+          streak: result.streak,
+          days: ALERT_STREAK_DAYS
+        });
         status.classList.add('ok');
         return;
       }
@@ -37,12 +40,16 @@ App.register('alerts', {
           id: 'alert-' + Date.now(),
           createdAt: new Date().toISOString(),
           dateKey: todayKey,
-          message: profile.name + ' has eaten less than the target for ' +
-                   result.streak + ' days in a row. Please consider a vet visit.'
+          catName: profile.name,
+          streak: result.streak,
+          message: I18n.t('{name} has eaten less than the target for {days} days in a row. Please consider a vet visit.', {
+            name: profile.name,
+            days: result.streak
+          })
         });
         MeowStore.saveAlerts(alerts);
       }
-      status.textContent = 'Alert created.';
+      I18n.setText(status, 'Alert created.');
       status.classList.add('bad');
       App.refresh();                        // วาดรายการใหม่ + อัปเดตจุดแดงบนแท็บ
     });
@@ -57,10 +64,20 @@ App.register('alerts', {
     alerts.forEach(a => {
       const li = document.createElement('li');
       const msg = document.createElement('div');
-      msg.textContent = a.message;          // ใช้ textContent (ปลอดภัยกว่า innerHTML)
+      const legacyMessage = a.message?.match(
+        /^(.*?) has eaten less than the target for (\d+) days in a row\. Please consider a vet visit\.$/
+      );
+      const catName = a.catName || legacyMessage?.[1];
+      const streak = a.streak || Number(legacyMessage?.[2]);
+      msg.textContent = catName && streak
+        ? I18n.t('{name} has eaten less than the target for {days} days in a row. Please consider a vet visit.', {
+          name: catName,
+          days: streak
+        })
+        : a.message;
       const when = document.createElement('div');
       when.className = 'when';
-      when.textContent = new Date(a.createdAt).toLocaleString();
+      when.textContent = new Date(a.createdAt).toLocaleString(I18n.language === 'th' ? 'th-TH' : 'en-US');
       li.append(msg, when);
       list.appendChild(li);
     });
