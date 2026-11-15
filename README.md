@@ -22,9 +22,7 @@ Irregular wet-diet leftovers make home tracking difficult, leaving vet checkups 
 
 - **Why it matters:** Prolonged underfeeding triggers organ failure, emergency re-hospitalization, and lost diagnostic time.
 
-## Demo
-- Web: _([GitHub Pages](https://github.com/6931503058/MeowMeal))_
-- Screenshots: _(add images to `docs/screenshots/` and link them here)_
+
 
 
 ## Core Feature (5 FRs)
@@ -49,13 +47,13 @@ JavaScript, CSS, HTML
 
 ```bash
 git clone https://github.com/6931503058/MeowMeal.git
-cd MeowMeal
+cd MeowMeal http://172.25.82.47:8000/#log
 ```
 Then open `index.html` in a browser. No installation needed.
 Click **Sample data** to see the alert and chart immediately.
 ## Features
 
-- Home
+- Log-in
 - Cat Profile
 - Manual meal logging
 - Early anomaly alert
@@ -63,9 +61,8 @@ Click **Sample data** to see the alert and chart immediately.
 - AI portion estimate
 
 
-## Project Document
-- [M1 Team Charter](https://drive.google.com/file/d/1BN0T683GlNzGHjN9GKIk_If5k1FUJEnk/view?usp=sharing)
-- [M2 Software Requirements Specification](https://drive.google.com/file/d/1HvYE0niH5jl0mLq1rcOxuX-44xeZwNSX/view?usp=sharing)
+
+
 ## Member
 | Name | ID | Role |
 | --- | --- | --------|
