@@ -1,28 +1,25 @@
 <!DOCTYPE html>
 <!--
-  MeowMeal – index.html  (App Shell v4 + Full Team Integration on branch `pa`)
+  MeowMeal – index.html  (App Shell v4 + Evidence-Based Clinical Criteria & Enhanced 30-Day Dashboard)
   ------------------------------------------------------------------
-  แอปหน้าเดียว (Single-Page App): ทุกหน้าเป็น <section> ในไฟล์นี้ มองเห็นทีละ 1 หน้า
-  ตัวสลับหน้าอยู่ใน js/app.js ; เปลี่ยนหน้าด้วยลิงก์แบบ hash เช่น <a href="#trend">
-
   แผนที่หน้า ↔ FR:
     #login    Login / Account         ระบบเข้าสู่ระบบผู้ดูแลแมว (Caregiver Auth)
-    #home     Home                    แสดงผล FR-1 (โปรไฟล์) + สถานะ FR-3 (5 วันล่าสุด + วันนี้)
-    #trend    Trend                   FR-4 (กราฟแนวโน้มย้อนหลัง 30 วันสำหรับสัตวแพทย์)
+    #home     Home                    แสดงผล FR-1 (โปรไฟล์) + สถานะ 5 วันล่าสุด + ประเมินอาการทางคลินิก
+    #trend    Trend                   FR-4 (แดชบอร์ดวิเคราะห์แนวโน้ม 30 วันสำหรับสัตวแพทย์: KPI + Combo Chart + ตารางรายวัน)
     #log      Log meal (ปุ่มกล้อง)     FR-5 (รูปก่อนกิน/หลังกิน ประเมินกรัม) + FR-2 (กรอกกรัม/เลือก % เอง)
     #snack    Snack                   FR-2 (extra snack → isOutlier)
-    #alerts   Alert (+ปุ่มกระดิ่ง)     FR-3 (แจ้งเตือน 5 วันติดกัน + เกณฑ์อ้างอิงสัตวแพทย์)
+    #alerts   Alert (+ปุ่มกระดิ่ง)     FR-3 (เกณฑ์ตัดสินความผิดปกติอ้างอิงงานวิจัย ISFM 2022 / WSAVA / Cornell / Merck)
     #profile  Cat profile & settings  FR-1 (ไอคอนแมวมุมซ้ายบน) + ตั้งค่าภาษา + Demo tools
 -->
 <html lang="th">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>MeowMeal – Feline Recovery & Intake Monitoring</title>
+  <title>MeowMeal – Feline Recovery &amp; Intake Monitoring</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Itim&family=Kodchasan:wght@400;500;700&family=Mali:wght@400;500;700&family=Quicksand:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Itim&amp;family=Kodchasan:wght@400;500;700&amp;family=Mali:wght@400;500;700&amp;family=Quicksand:wght@400;500;700&amp;display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
@@ -138,15 +135,79 @@
         </div>
       </section>
 
-      <!-- ################ TREND – FR-4 ################ -->
+      <!-- ################ TREND – FR-4 (ENHANCED CLINICAL DASHBOARD) ################ -->
       <section id="view-trend" class="view" data-tab="trend">
         <h1 data-i18n="Recovery trend">Recovery trend</h1>
         <p class="muted" data-i18n="Last 30 days. Show this to your vet at the next visit.">Last 30 days. Show this to your vet at the next visit.</p>
+
+        <!-- 1) KPI Summary Cards 4 ช่องสำหรับสัตวแพทย์ดูสรุปใน 3 วินาที -->
+        <div id="trend-kpi-grid" class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-title" data-i18n="Avg Daily Intake">Avg Daily Intake</div>
+            <div class="kpi-val" id="kpi-avg-val">–</div>
+            <div class="kpi-sub" id="kpi-avg-sub">–</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title" data-i18n="Target Compliance">Target Compliance</div>
+            <div class="kpi-val ok-text" id="kpi-normal-val">–</div>
+            <div class="kpi-sub" id="kpi-normal-sub">–</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title" data-i18n="Hyporexia Days (<80%)">Hyporexia Days (&lt;80%)</div>
+            <div class="kpi-val" id="kpi-risk-val">–</div>
+            <div class="kpi-sub" id="kpi-risk-sub">–</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title" data-i18n="Recent 5-Day Trend">Recent 5-Day Trend</div>
+            <div class="kpi-val" id="kpi-delta-val">–</div>
+            <div class="kpi-sub" id="kpi-delta-sub">–</div>
+          </div>
+        </div>
+
+        <!-- 2) การ์ดกราฟพร้อมปุ่มสลับช่วงเวลา (7 / 14 / 30 วัน) และปุ่มสลับหน่วย (% / กรัม) -->
         <div class="card">
+          <div class="trend-controls">
+            <div class="seg-group" role="group" aria-label="Time range">
+              <button type="button" class="seg-btn trend-range-btn" data-range="7" data-i18n="7 Days">7 Days</button>
+              <button type="button" class="seg-btn trend-range-btn" data-range="14" data-i18n="14 Days">14 Days</button>
+              <button type="button" class="seg-btn trend-range-btn active" data-range="30" data-i18n="30 Days">30 Days</button>
+            </div>
+            <div class="seg-group" role="group" aria-label="Unit mode">
+              <button type="button" class="seg-btn trend-unit-btn active" data-unit="pct" data-i18n="% of Target">% of Target</button>
+              <button type="button" class="seg-btn trend-unit-btn" data-unit="grams" data-i18n="Grams (g)">Grams (g)</button>
+            </div>
+          </div>
+
+          <!-- แถบอธิบายสีโซนทางคลินิก 4 ระดับ -->
+          <div class="zone-legend">
+            <span class="z-item"><i class="z-dot ok"></i><span data-i18n="Normal (>=80%)">Normal (&gt;=80%)</span></span>
+            <span class="z-item"><i class="z-dot warn"></i><span data-i18n="Hyporexia (50–79%)">Hyporexia (50–79%)</span></span>
+            <span class="z-item"><i class="z-dot bad"></i><span data-i18n="Severe (<50%)">Severe (&lt;50%)</span></span>
+            <span class="z-item"><i class="z-dot critical"></i><span data-i18n="Anorexia (<25%)">Anorexia (&lt;25%)</span></span>
+          </div>
+
           <div class="chart-box" id="trend-chart-box">
             <canvas id="recoveryChart"></canvas>
           </div>
           <p id="trend-empty" class="empty" data-i18n="No logs available" hidden>No logs available</p>
+        </div>
+
+        <!-- 3) ตารางสรุปข้อมูลรายวันย้อนหลังพร้อมป้ายสถานะทางการแพทย์ -->
+        <div class="card" id="trend-table-card">
+          <h2 data-i18n="Recent Daily Clinical Breakdown">Recent Daily Clinical Breakdown</h2>
+          <div class="table-scroll">
+            <table class="clinical-table">
+              <thead>
+                <tr>
+                  <th data-i18n="Date">Date</th>
+                  <th data-i18n="Intake (g)">Intake (g)</th>
+                  <th data-i18n="% RER">% RER</th>
+                  <th data-i18n="Clinical Status">Clinical Status</th>
+                </tr>
+              </thead>
+              <tbody id="trend-log-tbody"></tbody>
+            </table>
+          </div>
         </div>
       </section>
 
@@ -154,7 +215,6 @@
       <section id="view-log" class="view" data-tab="log">
         <h1 data-i18n="Log a meal">Log a meal</h1>
 
-        <!-- ส่วนที่ 1: รูปชามก่อนกิน + หลังกิน (FR-5) -->
         <div class="card">
           <h2><span data-i18n="Bowl photos">Bowl photos</span> <span class="muted" data-i18n="(optional)">(optional)</span></h2>
           <p class="muted" data-i18n="Photograph the bowl when you serve the food and again when your cat is done. We estimate how many grams were eaten.">
@@ -188,7 +248,6 @@
 
           <p id="photo-status" class="status" hidden></p>
 
-          <!-- ปุ่มลัดจำลองการเลือกไฟล์ภาพจากชุดข้อมูล S01–S16 ของจริง (เผื่อกดโชว์ตอนนำเสนอได้ทันที) -->
           <div class="demo-pairs-box">
             <small class="muted" data-i18n="Quick test with dataset photos (S01–S16):">Quick test with dataset photos (S01–S16):</small>
             <div class="demo-pair-btns">
@@ -199,7 +258,6 @@
           </div>
         </div>
 
-        <!-- ส่วนที่ 2: ปริมาณที่กิน (กรัม) (FR-2) -->
         <div class="card">
           <h2 data-i18n="Amount eaten">Amount eaten</h2>
           <div class="amount-grid">
@@ -264,12 +322,12 @@
         </div>
       </section>
 
-      <!-- ################ ALERTS – FR-3 (Golden Thread + Veterinary References) ################ -->
+      <!-- ################ ALERTS – FR-3 (EVIDENCE-BASED VETERINARY CRITERIA) ################ -->
       <section id="view-alerts" class="view" data-tab="alerts">
         <h1 data-i18n="Alerts">Alerts</h1>
         <div class="card">
-          <p class="muted" data-i18n="An alert is created when intake stays below 75% of the daily target for 5 days in a row.">
-            An alert is created when intake stays below 75% of the daily target for 5 days in a row.
+          <p class="muted" data-i18n="Evidence-based alert triggers when intake is < 80% RER for >= 3 consecutive days (ISFM 2022 / WSAVA), < 50% for >= 2 days (Merck), or < 25% for >= 1 day (Cornell).">
+            Evidence-based alert triggers when intake is &lt; 80% RER for &gt;= 3 consecutive days (ISFM 2022 / WSAVA), &lt; 50% for &gt;= 2 days (Merck), or &lt; 25% for &gt;= 1 day (Cornell).
           </p>
           <button id="btn-run-check" class="btn primary full" type="button" data-i18n="Run daily check now (demo)">Run daily check now (demo)</button>
           <p id="alerts-status" class="status" hidden></p>
@@ -278,23 +336,25 @@
         <ul id="alerts-list" class="alert-list"></ul>
         <p id="alerts-empty" class="empty" data-i18n="No alerts yet" hidden>No alerts yet</p>
 
-        <!-- การ์ดประเมินทางคลินิกและแหล่งอ้างอิงสัตวแพทย์ -->
+        <!-- การ์ดประเมินทางคลินิกและตารางเกณฑ์วิจัยสัตวแพทย์ -->
         <div class="card vet-ref-card">
-          <h2 data-i18n="Clinical Evaluation & Veterinary Criteria">Clinical Evaluation & Veterinary Criteria</h2>
+          <h2 data-i18n="Clinical Evaluation & Veterinary Criteria">Clinical Evaluation &amp; Veterinary Criteria</h2>
+          <div id="alerts-clinical-title" style="font-weight:700;margin-top:6px;"></div>
           <p id="alerts-clinical-eval" class="status ok"></p>
-          <h3 class="ref-heading" data-i18n="Veterinary References (Evidence-based):">Veterinary References (Evidence-based):</h3>
+
+          <h3 class="ref-heading" data-i18n="Veterinary Research Criteria Matrix:">Veterinary Research Criteria Matrix:</h3>
           <ul class="ref-list">
             <li>
-              <strong>ISFM Consensus Guidelines (Taylor et al., 2022 – JFMS):</strong>
-              แมวป่วยพักฟื้นที่ได้รับอาหารต่ำกว่า 75% ของเป้าหมายติดต่อกันเกิน 3–5 วัน จัดเป็นภาวะเบื่ออาหารทางคลินิก (Hyporexia) ที่ต้องได้รับการแทรกแซงทางโภชนาการ
+              <strong>Tier 1 – Suboptimal Intake Watch (&lt; 80% RER เป็นเวลา 1–2 วัน):</strong>
+              เฝ้าระวังอาการปวดแผล คลื่นไส้ หรือความเครียดจากสิ่งแวดล้อม <em>(ISFM Consensus Guidelines, 2022)</em>
             </li>
             <li>
-              <strong>WSAVA Global Nutrition Guidelines (2021):</strong>
-              การได้รับพลังงานต่ำกว่าความต้องการ (&lt; 75% RER) ต่อเนื่อง 3–5 วัน จะทำให้เกิดสมดุลพลังงานติดลบและสูญเสียมวลกล้ามเนื้อ
+              <strong>Tier 2 – Clinical Hyporexia Alert (&lt; 80% RER ติดต่อกัน &ge; 3 วัน):</strong>
+              เข้าเกณฑ์ข้อบ่งชี้ทางการแพทย์ที่ต้องได้รับการประเมินและเริ่มโภชนบำบัด (Nutritional Intervention) เพื่อป้องกันการสลายมวลกล้ามเนื้อและแผลหายช้า <em>(Taylor et al., 2022 ISFM Consensus Guidelines, JFMS; WSAVA Global Nutrition Guidelines)</em>
             </li>
             <li>
-              <strong>Merck Veterinary Manual &amp; Cornell Feline Health Center:</strong>
-              แมวที่กินอาหารลดลงอย่างรุนแรง (&lt; 50%) หรืออดอาหารต่อเนื่อง 2–5 วัน มีความเสี่ยงสูงต่อภาวะไขมันพอกตับเฉียบพลัน (Feline Hepatic Lipidosis) ซึ่งอันตรายถึงชีวิต
+              <strong>Tier 3 – Severe Hyporexia &amp; Acute Anorexia (&lt; 50% ติดต่อกัน &ge; 2 วัน หรือ &lt; 25% ภายใน 24 ชม.):</strong>
+              ภาวะวิกฤตที่ร่างกายแมวสลายไขมันส่วนเกินไปสะสมที่ตับอย่างรวดเร็ว เสี่ยงเกิด <strong>โรคไขมันพอกตับเฉียบพลันในแมว (Feline Hepatic Lipidosis)</strong> ต้องพบสัตวแพทย์ทันที <em>(Cornell Feline Health Center &amp; Merck Veterinary Manual, 2025)</em>
             </li>
           </ul>
         </div>
@@ -347,11 +407,10 @@
           </select>
         </div>
 
-        <!-- เครื่องมือสำหรับสาธิตอาจารย์ (เปิดไว้ให้กดใช้งานสะดวกทันที) -->
         <details class="card" open>
           <summary><strong data-i18n="Demo tools">Demo tools</strong></summary>
-          <p class="muted" data-i18n="Fills the app with 30 days of sample data. The last 5 completed days are below target (<75%), ready for live photo testing today.">
-            Fills the app with 30 days of sample data. The last 5 completed days are below target (&lt;75%), ready for live photo testing today.
+          <p class="muted" data-i18n="Fills the app with 30 days of sample data. The last 4 completed days show progressive clinical hyporexia (73% → 65% → 47% → 37%), ready for live photo testing today.">
+            Fills the app with 30 days of sample data. The last 4 completed days show progressive clinical hyporexia (73% → 65% → 47% → 37%), ready for live photo testing today.
           </p>
           <button id="btn-sample" class="btn primary full" type="button" data-i18n="Load 30-day sample data">Load 30-day sample data</button>
           <button id="btn-reset-today" class="btn full" type="button" data-i18n="Reset today's meals only">Reset today's meals only</button>

@@ -1,23 +1,5 @@
 /* =====================================================================
-   storage.js – ชั้นเก็บข้อมูลกลาง (ใช้ร่วมกันทุกหน้า - มาตรฐาน v4 + Auth)
-   ---------------------------------------------------------------------
-   รูปแบบข้อมูลที่ทีมใช้ตรงกัน:
-   Account (บัญชีผู้ใช้):
-     { email, name, role, loggedInAt }
-   Profile (แมว 1 ตัวใน MVP):
-     { catId, name, age, weight, diagnosis, dailyTargetG }
-   Log (1 รายการต่อ 1 เหตุการณ์):
-     มื้ออาหาร (kind: 'meal'):
-       { id, kind:'meal', timestamp (ISO),
-         servedG, leftG, eatenG (servedG - leftG),
-         dietTag, isOutlier:false, source:'photo'|'manual' }
-     ขนมนอกมื้อ (kind: 'snack'):
-       { id, kind:'snack', timestamp (ISO), servedG:null, leftG:null, eatenG:null,
-         dietTag:'ชนิดขนม', isOutlier:true }
-   Alert:
-     { id, createdAt (ISO), dateKey ("YYYY-MM-DD"), catName, streak, clinicalLevel, message }
-   Pending before photo:
-     { takenAt (ISO), dataUrl, est: { grams, confidence, problem, matchedId } }
+   storage.js – ชั้นเก็บข้อมูลกลาง (ใช้ร่วมกันทุกหน้า - มาตรฐาน v4 + Auth + Clinical Mockup)
    ===================================================================== */
 const MeowStore = (() => {
 
@@ -64,7 +46,6 @@ const MeowStore = (() => {
   function getProfile() {
     const p = read(KEYS.profile, null);
     if (!p) return null;
-    // รองรับทั้ง dailyTargetG (v4) และ dailyTarget (โค้ดเก่า)
     if (p.dailyTargetG == null && p.dailyTarget != null) {
       p.dailyTargetG = Number(p.dailyTarget);
     }
@@ -84,7 +65,6 @@ const MeowStore = (() => {
     return write(KEYS.logs, logs);
   }
 
-  // ล้างเฉพาะข้อมูลมื้ออาหารของ "วันนี้" (สำหรับซ้อมพรีเซนต์ซ้ำหน้างาน)
   function clearTodayLogs() {
     const todayStr = dateKey(new Date().toISOString());
     const kept = getLogs().filter(l => dateKey(l.timestamp) !== todayStr);
@@ -104,13 +84,15 @@ const MeowStore = (() => {
     [KEYS.profile, KEYS.logs, KEYS.alerts, KEYS.pending].forEach(k => localStorage.removeItem(k));
   }
 
-  /* ---- ข้อมูลตัวอย่าง 30 วันสำหรับสาธิตอาจารย์ ----
+  /* ---- ข้อมูลตัวอย่าง 30 วันอ้างอิงเกณฑ์วิจัยสัตวแพทย์ (ISFM 2022 / WSAVA / Merck) ----
      เป้า 180 g/วัน, วันละ 3 มื้อ (ให้มื้อละ 60 g)
-     - วันที่ 29 ถึง 6 วันก่อน (24 วันแรก): กินปกติ ~156–174 g/วัน (87–97% ของเป้า)
-     - 5 วันล่าสุดที่จบแล้ว (daysAgo = 5..1): กินน้อยต่อเนื่อง (114g, 99g, 84g, 75g, 66g -> 63%, 55%, 47%, 42%, 37% ของเป้า)
-       ซึ่งต่ำกว่าเกณฑ์ 75% ติดกันครบ 5 วัน -> กดตรวจ FR-3 แล้วแจ้งเตือนทันที!
-     - วันนี้ (daysAgo = 0): ยังไม่ลงบันทึกมื้ออาหาร เพื่อรอให้ทดสอบอัปโหลดรูป Before & After สดตอนนำเสนอ
-       แล้วกราฟ 5 วันล่าสุดและ 30 วันล่าสุดจะอัปเดตแท่งของ "วันนี้" ขึ้นมาทันที! */
+     - วันที่ 29 ถึง 5 วันก่อน (25 วันแรก): กินอยู่ในเกณฑ์ปกติ >= 80% RER (~150–177 g/วัน หรือ 83–98%)
+     - 4 วันล่าสุดที่จบแล้ว (daysAgo = 4..1): แสดงการลดลงของความอยากอาหารตามระยะทางคลินิก:
+         * 4 วันก่อน: 132 g/วัน (73% -> เริ่มเข้าโซน Hyporexia < 80% วันแรก)
+         * 3 วันก่อน: 117 g/วัน (65% -> Hyporexia วันที่ 2)
+         * 2 วันก่อน:  84 g/วัน (47% -> เข้าเกณฑ์ ISFM ครบ 3 วัน + เริ่มเข้าโซน Severe Hyporexia < 50%)
+         * เมื่อวาน:    66 g/วัน (37% -> Severe Hyporexia < 50% ติดต่อกัน 2 วัน เสี่ยง Hepatic Lipidosis)
+     - วันนี้ (daysAgo = 0): เว้นว่างไว้สำหรับสาธิตถ่ายรูป/อัปโหลดรูปชามอาหารสดตอนนำเสนอ */
   function loadSampleData() {
     if (!isLoggedIn()) {
       saveUser({
@@ -132,11 +114,16 @@ const MeowStore = (() => {
     const logs = [];
     const now = new Date();
     const mealHours = [8, 13, 19];
-    const lowDayEatenPerMeal = { 5: 38, 4: 33, 3: 28, 2: 25, 1: 22 }; // รวมต่อวัน = 114g (63%), 99g (55%), 84g (47%), 75g (42%), 66g (37%)
+    const clinicalDropPerMeal = {
+      4: 44, // รวม 132 g (73% - Hyporexia Day 1)
+      3: 39, // รวม 117 g (65% - Hyporexia Day 2)
+      2: 28, // รวม  84 g (47% - Hyporexia Day 3 + Severe < 50% Day 1)
+      1: 22  // รวม  66 g (37% - Hyporexia Day 4 + Severe < 50% Day 2 -> Critical Hepatic Lipidosis Risk)
+    };
 
     for (let daysAgo = 29; daysAgo >= 1; daysAgo--) {
-      const isLow = daysAgo >= 1 && daysAgo <= 5;
-      const eatenPerMeal = isLow ? lowDayEatenPerMeal[daysAgo] : (52 + (daysAgo % 3) * 3);
+      const isDrop = daysAgo in clinicalDropPerMeal;
+      const eatenPerMeal = isDrop ? clinicalDropPerMeal[daysAgo] : (51 + (daysAgo % 4) * 2);
       mealHours.forEach((hour, i) => {
         const when = new Date(now);
         when.setDate(now.getDate() - daysAgo);
@@ -148,6 +135,7 @@ const MeowStore = (() => {
           servedG: 60,
           leftG: 60 - eatenPerMeal,
           eatenG: eatenPerMeal,
+          remainingPct: Math.round(((60 - eatenPerMeal) / 60) * 100),
           dietTag: 'Recovery wet',
           isOutlier: false,
           source: 'manual'

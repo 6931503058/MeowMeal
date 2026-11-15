@@ -1,5 +1,5 @@
 /* =====================================================================
-   alerts.js – หน้า Alerts (FR-3 Golden Thread + เกณฑ์อ้างอิงสัตวแพทย์)   [Parewa]
+   alerts.js – หน้า Alerts (เกณฑ์ตัดสินความผิดปกติอ้างอิงงานวิจัย ISFM 2022 / WSAVA / Cornell / Merck)
    ===================================================================== */
 App.register('alerts', {
 
@@ -20,7 +20,7 @@ App.register('alerts', {
       const result = detectAnomaly(logs, profile);
 
       if (!result.triggered) {
-        I18n.setText(status, 'No alert. Low days in a row: {streak} of {days}.', {
+        I18n.setText(status, 'No clinical alert triggered yet. Consecutive days < 80% RER: {streak} of {days} days (ISFM/WSAVA threshold).', {
           streak: result.streak,
           days: ALERT_STREAK_DAYS
         });
@@ -37,15 +37,14 @@ App.register('alerts', {
           dateKey: todayKey,
           catName: profile.name,
           streak: result.streak,
+          severeStreak: result.severeStreak,
           clinicalLevel: result.clinicalLevel,
-          message: I18n.t(
-            '{name} has eaten less than {pct}% of the daily target for {days} days in a row. Please consider a vet visit.',
-            { name: profile.name, pct: ALERT_BELOW_PCT, days: result.streak }
-          )
+          titleKey: result.clinicalTitleKey,
+          reasonKey: result.clinicalReasonKey
         });
         MeowStore.saveAlerts(alerts);
       }
-      I18n.setText(status, 'Alert created.');
+      I18n.setText(status, 'Clinical alert created based on veterinary guidelines.');
       status.classList.add('bad');
       App.refresh();
     });
@@ -54,10 +53,13 @@ App.register('alerts', {
   onShow() {
     const profile = MeowStore.getProfile();
     const logs = MeowStore.getLogs();
+    const evalTitle = document.getElementById('alerts-clinical-title');
     const evalBox = document.getElementById('alerts-clinical-eval');
+
     if (evalBox && profile) {
       const r = detectAnomaly(logs, profile);
-      evalBox.className = 'status ' + (r.triggered || r.clinicalLevel === 'high-risk' ? 'bad' : 'ok');
+      if (evalTitle) I18n.setText(evalTitle, r.clinicalTitleKey);
+      evalBox.className = 'status ' + (r.triggered ? 'bad' : (r.clinicalLevel === 'watch' ? 'warn' : 'ok'));
       I18n.setText(evalBox, r.clinicalReasonKey);
     }
 
@@ -67,17 +69,19 @@ App.register('alerts', {
 
     alerts.forEach(a => {
       const li = document.createElement('li');
+      const titleDiv = document.createElement('div');
+      titleDiv.style.fontWeight = '700';
+      titleDiv.style.marginBottom = '4px';
+      titleDiv.textContent = (a.catName || (profile && profile.name) || 'Cat') + ' — ' + I18n.t(a.titleKey || 'Tier 2: Clinical Hyporexia Alert (< 80% for 3+ Days)');
+
       const msg = document.createElement('div');
-      const catName = a.catName || (profile && profile.name) || 'Cat';
-      const streak = a.streak || ALERT_STREAK_DAYS;
-      msg.textContent = I18n.t(
-        '{name} has eaten less than {pct}% of the daily target for {days} days in a row. Please consider a vet visit.',
-        { name: catName, pct: ALERT_BELOW_PCT, days: streak }
-      );
+      msg.textContent = a.reasonKey ? I18n.t(a.reasonKey) : (a.message || '');
+
       const when = document.createElement('div');
       when.className = 'when';
       when.textContent = new Date(a.createdAt).toLocaleString(I18n.language === 'th' ? 'th-TH' : 'en-US');
-      li.append(msg, when);
+
+      li.append(titleDiv, msg, when);
       list.appendChild(li);
     });
 
