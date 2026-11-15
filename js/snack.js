@@ -1,6 +1,9 @@
-// snack.js - บันทึกขนมที่ให้แมว (ไม่ใช่ baseline) (เอาไว้ไปพิจารณาร่วมกับเปอร์เซ็นต์ที่กินของมื้อหลัก)
-
-let selectedSnack = null;                    // ชนิดขนมที่เลือก (null = ยังไม่เลือก)
+/* =====================================================================
+   snack.js – หน้า Snack (FR-2 AC#2: extra snack)
+   ขนมนอกมื้อทำให้ข้อมูลการกินเพี้ยน จึงบันทึกแยก ติด isOutlier = true
+   → anomaly_detector.js ข้ามไปเอง ไม่นับใน baseline ของ FR-3
+   ===================================================================== */
+let selectedSnack = null;
 
 function selectSnack(name) {
   selectedSnack = name;
@@ -10,7 +13,6 @@ function selectSnack(name) {
   document.getElementById('snack-confirm').disabled = (name === null);
 }
 
-// วาดรายการขนมที่ให้ไปแล้ว "วันนี้"
 function renderTodaySnacks() {
   const todayKey = dateKey(new Date().toISOString());
   const snacks = MeowStore.getLogs().filter(l => l.kind === 'snack' && dateKey(l.timestamp) === todayKey);
@@ -48,9 +50,9 @@ App.register('snack', {
       const saved = MeowStore.addLog({
         kind: 'snack',
         timestamp: new Date().toISOString(),
-        remainingPct: null,                   // ขนมไม่มี % ที่เหลือ
+        servedG: null, leftG: null, eatenG: null,
         dietTag: selectedSnack,
-        isOutlier: true                       // ← สำคัญ: ไม่นับใน baseline
+        isOutlier: true
       });
       status.className = saved ? 'status ok' : 'status bad';
       I18n.setText(status, saved ? 'Snack saved.' : 'Could not save. Browser storage may be full.');

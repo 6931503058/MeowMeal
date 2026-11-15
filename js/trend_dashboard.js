@@ -1,29 +1,23 @@
-/* 
-   trend_dashboard.js – หน้า Trend 30 วัน (FR-4)
-   SRS:
-     - AC#1: มี log ≥ 1 รายการใน 30 วัน → วาดแท่งรายวันเรียงตามเวลา
-     - AC#2: ไม่มี log เลย → ซ่อนกราฟ แล้วโชว์ "No logs available" (ห้าม error)
-     - NFR-3: กราฟต้องเสร็จใน 2 วินาที
-   */
+/* =====================================================================
+   trend_dashboard.js – หน้า Trend 30 วัน (FR-4)   [Pattarawat]
+   แท่ง = % ของเป้ารายวันในแต่ละวัน (สีส้มแดงเมื่อต่ำกว่าเกณฑ์ ALERT_BELOW_PCT, สีฟ้าเมื่อปกติ)
+   เส้นประ = เกณฑ์ต่ำกว่าเป้าหมาย (ALERT_BELOW_PCT = 75%)
+   ===================================================================== */
 
-let trendChart = null;   // เก็บกราฟที่วาดไว้ เพื่อทำลายก่อนวาดใหม่ (ไม่งั้นกราฟซ้อนกัน)
+let trendChart = null;
 
 App.register('trend', {
 
-  // วาดกราฟ "ตอนเปิดหน้า" ไม่ใช่ตอนโหลดเว็บ เพราะหน้านี้ถูกซ่อนอยู่ตอนโหลด
-  // (กราฟที่วาดในกล่องที่ซ่อนอยู่จะได้ขนาดเป็น 0)
   onShow() {
     const logs = MeowStore.getLogs();
     const profile = MeowStore.getProfile();
     const box = document.getElementById('trend-chart-box');
     const empty = document.getElementById('trend-empty');
 
-    // ทำลายกราฟเก่า (ถ้ามี)
     if (trendChart) { trendChart.destroy(); trendChart = null; }
 
-    // สร้างรายการ 30 วันล่าสุด (วันที่เก่าสุด → วันนี้)
-    const labels = [];     // ข้อความใต้แท่ง เช่น "10/09"
-    const keys = [];       // กุญแจวันที่ "YYYY-MM-DD" ไว้จับคู่กับข้อมูล
+    const labels = [];
+    const keys = [];
     const today = new Date();
     for (let i = 29; i >= 0; i--) {
       const d = new Date(today);
@@ -32,52 +26,75 @@ App.register('trend', {
       labels.push((d.getMonth() + 1) + '/' + d.getDate());
     }
 
-    // จับคู่ข้อมูลรายวันกับ 30 วัน (วันไหนไม่มี log = null → ไม่มีแท่ง)
-    // ตัดสินใจ: กราฟนี้ไม่นับมื้อ extra snack (ใช้ dailyEaten ค่าเริ่มต้น) ทีมปรับได้
-    const eatenByDay = {};
-    dailyEaten(logs).forEach(d => { eatenByDay[d.date] = Math.round(d.eaten); });
-    const data = keys.map(k => (k in eatenByDay ? eatenByDay[k] : null));
+    const pctByDay = {}, gramsByDay = {};
+    const targetG = profile ? (profile.dailyTargetG || profile.dailyTarget || 180) : 180;
+    if (profile) {
+      dailyIntake(logs, targetG).forEach(d => {
+        pctByDay[d.date] = Math.round(d.pct);
+        gramsByDay[d.date] = Math.round(d.eatenG);
+      });
+    }
+    const data = keys.map(k => (k in pctByDay ? pctByDay[k] : null));
+    const grams = keys.map(k => (k in gramsByDay ? gramsByDay[k] : null));
 
-    // ไม่มีข้อมูลเลยใน 30 วัน → empty state (FR-4 AC#2)
     const hasData = data.some(v => v !== null);
     box.hidden = !hasData;
     empty.hidden = hasData;
     if (!hasData) return;
 
-    // ชุดข้อมูล: แท่ง = % ที่กิน ; เส้น = เป้าหมาย (ถ้ามีโปรไฟล์)
-    const datasets = [{
-      type: 'bar',
-      label: I18n.t('Eaten (%)'),
-      data: data,
-      backgroundColor: data.map((value, index) =>
-        index >= data.length - 5 ? 'rgba(239, 68, 68, 0.7)' : 'rgba(59, 130, 246, 0.7)'
-      ),
-      borderColor: data.map((value, index) =>
-        index >= data.length - 5 ? 'rgba(239, 68, 68, 1)' : 'rgba(59, 130, 246, 1)'
-      ),
-      borderWidth: 1
-    }];
-    if (profile) {
-      datasets.push({
-        type: 'line',
-        label: I18n.t('Target (%)'),
-        data: keys.map(() => profile.dailyTarget),   // เส้นแนวนอนค่าคงที่
-        borderColor: getComputedStyle(document.documentElement).getPropertyValue('--accent').trim(),
-        borderWidth: 2,
-        borderDash: [5, 5],
-        pointRadius: 0,
-        fill: false
-      });
-    }
+    const barColors = data.map(v =>
+      v === null ? 'transparent' : (v < ALERT_BELOW_PCT ? 'rgba(224, 116, 90, 0.88)' : 'rgba(124, 193, 230, 0.9)')
+    );
+    const barBorders = data.map(v =>
+      v === null ? 'transparent' : (v < ALERT_BELOW_PCT ? '#b4412a' : '#1f6f95')
+    );
 
     trendChart = new Chart(document.getElementById('recoveryChart'), {
-      data: { labels, datasets },
+      data: {
+        labels,
+        datasets: [
+          {
+            type: 'bar',
+            label: I18n.t('% of daily target'),
+            data: data,
+            backgroundColor: barColors,
+            borderColor: barBorders,
+            borderWidth: 1,
+            borderRadius: 4
+          },
+          {
+            type: 'line',
+            label: I18n.t('Low-intake threshold ({pct}%)', { pct: ALERT_BELOW_PCT }),
+            data: keys.map(() => ALERT_BELOW_PCT),
+            borderColor: '#b4412a',
+            borderWidth: 2,
+            borderDash: [5, 5],
+            pointRadius: 0,
+            fill: false
+          }
+        ]
+      },
       options: {
         responsive: true,
-        maintainAspectRatio: false,          // ให้สูงตามกล่อง .chart-box (280px)
+        maintainAspectRatio: false,
         scales: {
-          y: { min: 0, max: 100, title: { display: true, text: I18n.t('% eaten') } },
-          x: { ticks: { maxTicksLimit: 8 } } // ไม่ให้วันที่แน่นเกินบนจอมือถือ
+          y: {
+            min: 0,
+            suggestedMax: 100,
+            title: { display: true, text: I18n.t('% of daily target') }
+          },
+          x: {
+            ticks: { maxTicksLimit: 8 }
+          }
+        },
+        plugins: {
+          tooltip: {
+            callbacks: {
+              afterLabel: (ctx) => ctx.datasetIndex === 0 && grams[ctx.dataIndex] !== null
+                ? grams[ctx.dataIndex] + ' g / ' + targetG + ' g'
+                : ''
+            }
+          }
         }
       }
     });
