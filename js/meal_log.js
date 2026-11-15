@@ -1,70 +1,120 @@
-/*  
-   log.js – หน้า Log a meal : ส่วนเลือก % เอง + บันทึก (FR-2)   [Puree]
-   ส่วนรูปถ่าย (FR-5) อยู่ใน photo.js ; สองไฟล์คุยกันผ่าน LogMeal.setPct()
+/* =====================================================================
+   meal_log.js – หน้า Log a meal : ปริมาณที่กิน (กรัม) + บันทึก (FR-2)   [Puree]
+   ส่วนรูปก่อนกิน/หลังกิน (FR-5) อยู่ใน photo.js ; สองไฟล์คุยกันผ่าน LogMeal.set()
+   ===================================================================== */
 
-   Acceptance criteria FR-2:
-     AC#1: เลือก % (0/25/50/75/100) + diet tag → กด Log meal → บันทึกพร้อม timestamp ภายใน 1 วินาที
-     AC#2: ขนม extra snack → อยู่ที่หน้า Snack (snack.js) บันทึกเป็น isOutlier = true
-*/
-
-// LogMeal = "สถานะของฟอร์ม" ที่ photo.js ก็เข้าถึงได้ (ตัวแปรกลางของหน้านี้)
 const LogMeal = (() => {
-  let selected = null;                       // % ที่เลือกอยู่ (null = ยังไม่เลือก)
+  let source = 'manual';
 
-  // เลือก % (ส่ง null = ล้างการเลือก) : ไฮไลต์ปุ่ม + เปิด/ปิดปุ่ม Log meal
-  function setPct(value) {
-    selected = value;
+  const el = (id) => document.getElementById(id);
+  const round1 = (x) => Math.round(x * 10) / 10;
+
+  function readNum(id) {
+    const node = el(id);
+    if (!node) return null;
+    const raw = node.value;
+    return raw === '' ? null : Number(raw);
+  }
+
+  function values() {
+    return { served: readNum('log-served'), left: readNum('log-left') };
+  }
+
+  function check() {
+    const { served, left } = values();
+    if (served === null || left === null) return { ok: false, eaten: null, message: '' };
+    if (!(served > 0)) return { ok: false, eaten: null, message: 'Served must be more than 0 g.' };
+    if (left < 0) return { ok: false, eaten: null, message: 'Left cannot be negative.' };
+    if (left > served) return { ok: false, eaten: null, message: "Left can't be more than served." };
+    return { ok: true, eaten: round1(served - left), message: '' };
+  }
+
+  function recalc() {
+    const r = check();
+    el('log-eaten').textContent = r.ok ? r.eaten + ' g' : '–';
+    el('log-confirm').disabled = !r.ok;
+
+    const { served, left } = values();
     document.querySelectorAll('#log-pct-grid .pct-btn').forEach(btn => {
-      btn.classList.toggle('selected', Number(btn.dataset.pct) === value);
+      const match = r.ok && Math.abs((left / served) * 100 - Number(btn.dataset.pct)) < 1.0;
+      btn.classList.toggle('selected', match);
     });
-    document.getElementById('log-confirm').disabled = (value === null);
+
+    const status = el('log-status');
+    status.hidden = !r.message;
+    status.className = 'status bad';
+    if (r.message) I18n.setText(status, r.message);
   }
 
-  function getPct() { return selected; }
+  function set({ served, left, src }) {
+    if (served !== undefined) el('log-served').value = served === null ? '' : served;
+    if (left !== undefined) el('log-left').value = left === null ? '' : left;
+    if (src) source = src;
+    recalc();
+  }
 
-  // รีเซ็ตทั้งฟอร์ม (เรียกทุกครั้งที่เปิดหน้า)
   function reset() {
-    setPct(null);
-    const status = document.getElementById('log-status');
-    status.hidden = true;
-    status.className = 'status';
+    source = 'manual';
+    const lastMeal = MeowStore.getLogs().filter(l => l.kind === 'meal').pop();
+    el('log-served').value = lastMeal && lastMeal.servedG ? lastMeal.servedG : 60;
+    el('log-left').value = '';
+    recalc();
   }
 
-  return { setPct, getPct, reset };
+  return { set, values, check, recalc, reset, getSource: () => source };
 })();
 
 App.register('log', {
 
   init() {
-    // กดปุ่ม % ปุ่มไหน → เลือกค่านั้น (data-pct เป็นข้อความ จึงแปลงเป็นตัวเลขด้วย Number)
+    ['log-served', 'log-left'].forEach(id => {
+      document.getElementById(id).addEventListener('input', LogMeal.recalc);
+    });
+
     document.querySelectorAll('#log-pct-grid .pct-btn').forEach(btn => {
-      btn.addEventListener('click', () => LogMeal.setPct(Number(btn.dataset.pct)));
+      btn.addEventListener('click', () => {
+        const { served } = LogMeal.values();
+        if (!(served > 0)) {
+          const status = document.getElementById('log-status');
+          status.hidden = false;
+          status.className = 'status bad';
+          I18n.setText(status, 'Enter the amount served first.');
+          return;
+        }
+        LogMeal.set({ left: Math.round(served * Number(btn.dataset.pct) / 100 * 10) / 10 });
+      });
     });
 
     document.getElementById('log-confirm').addEventListener('click', () => {
       const status = document.getElementById('log-status');
-      status.hidden = false;
 
-      // ต้องมีโปรไฟล์แมวก่อน ไม่งั้นบันทึกให้ใครไม่ได้
       if (!MeowStore.getProfile()) {
+        status.hidden = false;
         status.className = 'status bad';
         I18n.setText(status, "Add your cat's profile first (cat icon, top left).");
         return;
       }
-      if (LogMeal.getPct() === null) return;   // ปุ่มถูก disable อยู่แล้ว แต่กันไว้อีกชั้น
+      const r = LogMeal.check();
+      if (!r.ok) return;
+      const { served, left } = LogMeal.values();
 
-      // บันทึก: รูปแบบต้องตรงกับที่ storage.js กำหนด
       const saved = MeowStore.addLog({
         kind: 'meal',
         timestamp: new Date().toISOString(),
-        remainingPct: LogMeal.getPct(),        // % ที่ "เหลือ"
+        servedG: served,
+        leftG: left,
+        eatenG: r.eaten,
+        remainingPct: Math.round((left / served) * 100),
         dietTag: document.getElementById('log-diet').value,
-        isOutlier: false
+        isOutlier: false,
+        source: LogMeal.getSource()
       });
 
+      if (saved) MeowStore.clearPendingBefore();
+      status.hidden = false;
       status.className = saved ? 'status ok' : 'status bad';
       I18n.setText(status, saved ? 'Meal saved.' : 'Could not save. Browser storage may be full.');
-      if (saved) setTimeout(() => { location.hash = '#home'; }, 600);   // ให้เห็นข้อความแป๊บหนึ่ง
+      if (saved) setTimeout(() => { location.hash = '#home'; }, 600);
     });
   },
 

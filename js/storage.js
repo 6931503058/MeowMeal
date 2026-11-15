@@ -1,14 +1,16 @@
-
+/* =====================================================================
+   storage.js – ชั้นเก็บข้อมูลกลาง (ใช้ร่วมกันทุกหน้า - มาตรฐาน v4 + Auth + Clinical Mockup)
+   ===================================================================== */
 const MeowStore = (() => {
 
-  // ชื่อ key ที่ใช้เก็บใน localStorage (รวมไว้ที่เดียว จะได้ไม่พิมพ์ผิด)
   const KEYS = {
+    user:    'meowmeal_user',
     profile: 'meowmeal_profile',
     logs:    'meowmeal_logs',
-    alerts:  'meowmeal_alerts'
+    alerts:  'meowmeal_alerts',
+    pending: 'meowmeal_pending_before'
   };
 
-  // อ่านค่า: ถ้าไม่มี หรืออ่านไม่ได้ ให้คืนค่า fallback แทนที่จะให้แอปพัง
   function read(key, fallback) {
     try {
       const raw = localStorage.getItem(key);
@@ -18,7 +20,6 @@ const MeowStore = (() => {
     }
   }
 
-  // เขียนค่า: คืน true ถ้าสำเร็จ / false ถ้าไม่สำเร็จ (เช่น พื้นที่เต็ม)
   function write(key, value) {
     try {
       localStorage.setItem(key, JSON.stringify(value));
@@ -28,62 +29,130 @@ const MeowStore = (() => {
     }
   }
 
-  // % ที่แมวกิน = 100 - % ที่เหลือ  (log ขนมไม่มี % → คืน null)
-  const eatenPct = (log) => (log.remainingPct == null ? null : 100 - log.remainingPct);
+  /* ---- User Account / Login ---- */
+  function getUser() {
+    return read(KEYS.user, {
+      email: 'parewa.se@mfu.ac.th',
+      name: 'Parewa (Caregiver)',
+      role: 'Cat Owner / Caregiver',
+      loggedInAt: new Date().toISOString()
+    });
+  }
+  const saveUser = (u) => write(KEYS.user, u);
+  const logoutUser = () => localStorage.removeItem(KEYS.user);
+  const isLoggedIn = () => !!read(KEYS.user, null);
 
   /* ---- Profile (FR-1) ---- */
-  const getProfile  = () => read(KEYS.profile, null);   // null = ยังไม่เคยสร้าง
-  const saveProfile = (p) => write(KEYS.profile, p);
+  function getProfile() {
+    const p = read(KEYS.profile, null);
+    if (!p) return null;
+    if (p.dailyTargetG == null && p.dailyTarget != null) {
+      p.dailyTargetG = Number(p.dailyTarget);
+    }
+    return p;
+  }
+  function saveProfile(p) {
+    const normalized = { ...p, dailyTargetG: Number(p.dailyTargetG ?? p.dailyTarget ?? 180) };
+    return write(KEYS.profile, normalized);
+  }
 
-  /* ---- Meal logs (FR-2 เขียน / FR-3, FR-4 อ่าน) ---- */
+  /* ---- Logs (FR-2 / FR-5 เขียน ; FR-3, FR-4 อ่าน) ---- */
   const getLogs = () => read(KEYS.logs, []);
   function addLog(log) {
     const logs = getLogs();
-    // id สร้างจากเวลา + ตัวสุ่ม เพื่อให้ไม่ซ้ำกัน
     const id = Date.now() + '-' + Math.random().toString(36).slice(2, 7);
     logs.push({ id, ...log });
     return write(KEYS.logs, logs);
+  }
+
+  function clearTodayLogs() {
+    const todayStr = dateKey(new Date().toISOString());
+    const kept = getLogs().filter(l => dateKey(l.timestamp) !== todayStr);
+    return write(KEYS.logs, kept);
   }
 
   /* ---- Alerts (FR-3) ---- */
   const getAlerts  = () => read(KEYS.alerts, []);
   const saveAlerts = (a) => write(KEYS.alerts, a);
 
-  // ล้างข้อมูลทั้งหมด (ปุ่ม Clear all data)
+  /* ---- รูปก่อนกินที่รอรูปหลังกิน (FR-5) ---- */
+  const getPendingBefore   = () => read(KEYS.pending, null);
+  const savePendingBefore  = (p) => write(KEYS.pending, p);
+  const clearPendingBefore = () => localStorage.removeItem(KEYS.pending);
+
   function clearAll() {
-    Object.values(KEYS).forEach(k => localStorage.removeItem(k));
+    [KEYS.profile, KEYS.logs, KEYS.alerts, KEYS.pending].forEach(k => localStorage.removeItem(k));
   }
 
-  /* ---- ข้อมูลตัวอย่างสำหรับสาธิต ----
-     30 วัน: 25 วันแรกกินปกติ (เหลือ 25% → กิน 75%) แล้ว 5 วันสุดท้ายกินน้อย (เหลือ 75% → กิน 25%)
-     เป้าหมาย 70% → 5 วันท้ายต่ำกว่าเป้า จึงทำให้ FR-3 เตือน */
+  /* ---- ข้อมูลตัวอย่าง 30 วันอ้างอิงเกณฑ์วิจัยสัตวแพทย์ (ISFM 2022 / WSAVA / Merck) ----
+     เป้า 180 g/วัน, วันละ 3 มื้อ (ให้มื้อละ 60 g)
+     - วันที่ 29 ถึง 5 วันก่อน (25 วันแรก): กินอยู่ในเกณฑ์ปกติ >= 80% RER (~150–177 g/วัน หรือ 83–98%)
+     - 4 วันล่าสุดที่จบแล้ว (daysAgo = 4..1): แสดงการลดลงของความอยากอาหารตามระยะทางคลินิก:
+         * 4 วันก่อน: 132 g/วัน (73% -> เริ่มเข้าโซน Hyporexia < 80% วันแรก)
+         * 3 วันก่อน: 117 g/วัน (65% -> Hyporexia วันที่ 2)
+         * 2 วันก่อน:  84 g/วัน (47% -> เข้าเกณฑ์ ISFM ครบ 3 วัน + เริ่มเข้าโซน Severe Hyporexia < 50%)
+         * เมื่อวาน:    66 g/วัน (37% -> Severe Hyporexia < 50% ติดต่อกัน 2 วัน เสี่ยง Hepatic Lipidosis)
+     - วันนี้ (daysAgo = 0): เว้นว่างไว้สำหรับสาธิตถ่ายรูป/อัปโหลดรูปชามอาหารสดตอนนำเสนอ */
   function loadSampleData() {
+    if (!isLoggedIn()) {
+      saveUser({
+        email: 'parewa.se@mfu.ac.th',
+        name: 'Parewa (Caregiver)',
+        role: 'Cat Owner / Caregiver',
+        loggedInAt: new Date().toISOString()
+      });
+    }
     saveProfile({
-      catId: 'cat1', name: 'Mochi', age: 7, weight: 4.2,
-      diagnosis: 'Post-op recovery', dailyTarget: 70
+      catId: 'CAT_01',
+      name: 'Mochi (โมจิ)',
+      age: 7,
+      weight: 4.2,
+      diagnosis: 'Post-op recovery (พักฟื้นหลังผ่าตัด)',
+      dailyTargetG: 180
     });
 
     const logs = [];
-    const today = new Date();
-    for (let daysAgo = 29; daysAgo >= 0; daysAgo--) {
-      const day = new Date(today);
-      day.setDate(today.getDate() - daysAgo);
-      day.setHours(8, 0, 0, 0);                  // สมมติบันทึกตอน 08:00
-      const eatingLess = daysAgo < 5;            // 5 วันล่าสุด
-      logs.push({
-        id: 'sample-' + daysAgo,
-        kind: 'meal',
-        timestamp: day.toISOString(),
-        remainingPct: eatingLess ? 75 : 25,
-        dietTag: 'Recovery wet',
-        isOutlier: false
+    const now = new Date();
+    const mealHours = [8, 13, 19];
+    const clinicalDropPerMeal = {
+      4: 44, // รวม 132 g (73% - Hyporexia Day 1)
+      3: 39, // รวม 117 g (65% - Hyporexia Day 2)
+      2: 28, // รวม  84 g (47% - Hyporexia Day 3 + Severe < 50% Day 1)
+      1: 22  // รวม  66 g (37% - Hyporexia Day 4 + Severe < 50% Day 2 -> Critical Hepatic Lipidosis Risk)
+    };
+
+    for (let daysAgo = 29; daysAgo >= 1; daysAgo--) {
+      const isDrop = daysAgo in clinicalDropPerMeal;
+      const eatenPerMeal = isDrop ? clinicalDropPerMeal[daysAgo] : (51 + (daysAgo % 4) * 2);
+      mealHours.forEach((hour, i) => {
+        const when = new Date(now);
+        when.setDate(now.getDate() - daysAgo);
+        when.setHours(hour, 0, 0, 0);
+        logs.push({
+          id: 'sample-' + daysAgo + '-' + i,
+          kind: 'meal',
+          timestamp: when.toISOString(),
+          servedG: 60,
+          leftG: 60 - eatenPerMeal,
+          eatenG: eatenPerMeal,
+          remainingPct: Math.round(((60 - eatenPerMeal) / 60) * 100),
+          dietTag: 'Recovery wet',
+          isOutlier: false,
+          source: 'manual'
+        });
       });
     }
     write(KEYS.logs, logs);
-    saveAlerts([]);                              // เริ่มโดยยังไม่มี alert (ให้กดตรวจเองตอนสาธิต)
+    clearPendingBefore();
+    saveAlerts([]);
   }
 
-  // เปิดให้ไฟล์อื่นเรียกใช้เฉพาะฟังก์ชันเหล่านี้
-  return { eatenPct, getProfile, saveProfile, getLogs, addLog,
-           getAlerts, saveAlerts, clearAll, loadSampleData };
+  return {
+    getUser, saveUser, logoutUser, isLoggedIn,
+    getProfile, saveProfile,
+    getLogs, addLog, clearTodayLogs,
+    getAlerts, saveAlerts,
+    clearAll, loadSampleData,
+    getPendingBefore, savePendingBefore, clearPendingBefore
+  };
 })();

@@ -30,7 +30,7 @@
 *, *::before, *::after { box-sizing: border-box; }   /* width รวม padding/border */
 body {
   margin: 0;
-  font-family: "Quicksand", system-ui, -apple-system, "Segoe UI", "Noto Sans Thai", sans-serif;
+  font-family: "Quicksand", "Mali", "Kodchasan", system-ui, -apple-system, "Segoe UI", "Noto Sans Thai", sans-serif;
   background: var(--sky-100);
   color: var(--ink);
   line-height: 1.5;
@@ -211,3 +211,166 @@ details button { margin: 6px 6px 0 0; }
                  border-left: 6px solid var(--warn); border-radius: var(--radius);
                  padding: 12px 14px; margin-bottom: 10px; }
 .alert-list .when { color: var(--ink-soft); font-size: .85rem; }
+
+/* ---- v4: สรุปวันนี้บนหน้า Home ---- */
+#view-home .today-line { font-weight: 700; margin: 4px 0 0; }
+
+/* ---- v4: ช่องรูป ก่อนกิน / หลังกิน วางคู่กัน ---- */
+#view-log .photo-slots { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; }
+#view-log .photo-slot { display: flex; flex-direction: column; gap: 8px; }
+#view-log .slot-title { font-weight: 700; text-align: center; }
+#view-log .slot-frame { aspect-ratio: 4 / 3; display: flex; align-items: center; justify-content: center;
+                        border: 2px dashed var(--line); border-radius: var(--radius-sm);
+                        background: var(--sky-50); color: var(--ink-soft); font-size: .85rem; overflow: hidden; }
+#view-log .slot-frame img { width: 100%; height: 100%; object-fit: cover; }
+#view-log .photo-slot button { width: 100%; padding: 0 8px; font-size: .9rem; }
+
+/* ---- v4: ช่อง Served / Left และผลกรัมที่กิน ---- */
+#view-log .amount-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+#view-log .quick-label { color: var(--ink-soft); font-size: .85rem; margin: 14px 0 6px; }
+#view-log .eaten-result { text-align: center; margin: 14px 0 0; }
+#view-log .eaten-result span { display: block; font-size: 2rem; font-weight: 700; line-height: 1.1; }
+#view-log .eaten-result small { color: var(--ink-soft); }
+
+/* ---- v4: หน้าต่างกล้องบนคอมพิวเตอร์ ---- */
+.cam-modal { position: absolute; inset: 0; z-index: 20; background: #000; display: flex; flex-direction: column; }
+.cam-modal video { flex: 1; width: 100%; min-height: 0; object-fit: cover; background: #000; }
+.cam-modal .status { margin: 12px; }
+.cam-title { color: #fff; text-align: center; font-weight: 700; margin: 12px 0 8px; }
+.cam-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+               padding: 14px 16px calc(14px + env(safe-area-inset-bottom, 0px)); background: #000; }
+
+
+/* ---- เพิ่มเติมสำหรับหน้า Login, ปุ่มทดสอบรูปชุดข้อมูล S01–S16 และการ์ดอ้างอิงสัตวแพทย์ ---- */
+input[type="email"], input[type="password"] {
+  width: 100%; min-height: var(--tap); padding: 8px 12px;
+  font: inherit; color: var(--ink); background: var(--surface);
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+}
+.login-card { margin-top: 16px; }
+.login-hero { text-align: center; margin-bottom: 12px; }
+.divider { border: 0; border-top: 1px solid var(--line); margin: 16px 0; }
+.demo-pairs-box { margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--line); }
+.demo-pair-btns { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+.demo-pair-btn { min-height: 38px; font-size: .85rem; background: var(--sky-50); border: 1px solid var(--sky-400); color: var(--sky-700); }
+.vet-ref-card { margin-top: 14px; font-size: .9rem; }
+.ref-heading { font-size: .95rem; margin: 12px 0 6px; color: var(--sky-700); }
+.ref-list { padding-left: 18px; margin: 0; color: var(--ink-soft); }
+.ref-list li { margin-bottom: 8px; line-height: 1.45; }
+
+
+/* ---- สไตล์สำหรับแดชบอร์ดแนวโน้ม 30 วันรูปแบบใหม่ (KPI Cards + Segmented Filter + Clinical Breakdown Table) ---- */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.kpi-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 10px 12px;
+}
+.kpi-title {
+  font-size: .75rem;
+  color: var(--ink-soft);
+  font-weight: 700;
+}
+.kpi-val {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 2px 0;
+  color: var(--ink);
+}
+.kpi-sub {
+  font-size: .72rem;
+  color: var(--ink-soft);
+}
+.ok-text   { color: #1b7a54 !important; }
+.warn-text { color: #b86b11 !important; }
+.bad-text  { color: #b42323 !important; }
+
+.trend-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.seg-group {
+  display: inline-flex;
+  background: var(--sky-50);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 2px;
+}
+.seg-btn {
+  min-height: 30px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font-size: .78rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+.seg-btn.active {
+  background: var(--sky-400);
+  color: var(--ink);
+}
+
+.zone-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  font-size: .74rem;
+  color: var(--ink-soft);
+  margin-bottom: 8px;
+}
+.z-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.z-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  display: inline-block;
+}
+.z-dot.ok       { background: rgba(46, 160, 115, 0.85); border: 1px solid #1b7a54; }
+.z-dot.warn     { background: rgba(240, 158, 56, 0.90); border: 1px solid #b86b11; }
+.z-dot.bad      { background: rgba(224, 96, 68, 0.92); border: 1px solid #a8331b; }
+.z-dot.critical { background: rgba(180, 35, 35, 0.95); border: 1px solid #6e0f0f; }
+
+.table-scroll {
+  overflow-x: auto;
+}
+.clinical-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .82rem;
+}
+.clinical-table th, .clinical-table td {
+  padding: 7px 6px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+}
+.clinical-table th {
+  color: var(--ink-soft);
+  font-size: .76rem;
+}
+.zone-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: .72rem;
+  font-weight: 700;
+}
+.zone-badge.ok       { background: #dcfce7; color: #166534; }
+.zone-badge.warn     { background: #fef3c7; color: #92400e; }
+.zone-badge.bad      { background: #fee2e2; color: #991b1b; }
+.zone-badge.critical { background: #7f1d1d; color: #ffffff; }
+.status.warn         { background: #fef3c7; color: #92400e; }
