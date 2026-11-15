@@ -169,7 +169,10 @@ const I18n = (() => {
       'Meal saved.': 'บันทึกมื้ออาหารเรียบร้อยแล้ว กำลังอัปเดตกราฟ…',
       'Snack saved.': 'บันทึกขนมเรียบร้อยแล้ว',
       'Could not save. Browser storage may be full.': 'บันทึกไม่สำเร็จ พื้นที่จัดเก็บของเบราว์เซอร์อาจเต็ม',
-      'Add a cat profile first.': 'กรุณาเพิ่มโปรไฟล์แมวก่อน'
+            'Add a cat profile first.': 'กรุณาเพิ่มโปรไฟล์แมวก่อน',
+      'ref_tier1': '<strong>Tier 1 – Suboptimal Intake Watch (< 80% RER เป็นเวลา 1–2 วัน):</strong> เฝ้าระวังอาการปวดแผล คลื่นไส้ หรือความเครียดจากสิ่งแวดล้อม <em>(ISFM Consensus Guidelines, 2022)</em>',
+      'ref_tier2': '<strong>Tier 2 – Clinical Hyporexia Alert (< 80% RER ติดต่อกัน ≥ 3 วัน):</strong> เข้าเกณฑ์ข้อบ่งชี้ทางการแพทย์ที่ต้องได้รับการประเมินและเริ่มโภชนบำบัด (Nutritional Intervention) เพื่อป้องกันการสลายมวลกล้ามเนื้อและแผลหายช้า <em>(Taylor et al., 2022 ISFM Consensus Guidelines, JFMS; WSAVA Global Nutrition Guidelines)</em>',
+      'ref_tier3': '<strong>Tier 3 – Severe Hyporexia & Acute Anorexia (< 50% ติดต่อกัน ≥ 2 วัน หรือ < 25% ภายใน 24 ชม.):</strong> ภาวะวิกฤตที่ร่างกายแมวสลายไขมันส่วนเกินไปสะสมที่ตับอย่างรวดเร็ว เสี่ยงเกิด <strong>โรคไขมันพอกตับเฉียบพลันในแมว (Feline Hepatic Lipidosis)</strong> ต้องพบสัตวแพทย์ทันที <em>(Cornell Feline Health Center & Merck Veterinary Manual, 2025)</em>'
     }
   };
 
@@ -188,7 +191,12 @@ const I18n = (() => {
   function apply() {
     document.documentElement.lang = language;
     document.querySelectorAll('[data-i18n]').forEach(element => {
-      element.textContent = t(element.dataset.i18n);
+      // Use innerHTML for reference list items to preserve bold/italic tags
+      if (element.dataset.i18n.startsWith('ref_')) {
+          element.innerHTML = t(element.dataset.i18n);
+      } else {
+          element.textContent = t(element.dataset.i18n);
+      }
     });
     document.querySelectorAll('[data-i18n-placeholder]').forEach(element => {
       element.placeholder = t(element.dataset.i18nPlaceholder);
