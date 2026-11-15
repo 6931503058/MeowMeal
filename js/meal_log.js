@@ -59,6 +59,7 @@ App.register('log', {
         timestamp: new Date().toISOString(),
         remainingPct: LogMeal.getPct(),        // % ที่ "เหลือ"
         dietTag: document.getElementById('log-diet').value,
+        photoData: typeof MealPhoto !== 'undefined' ? MealPhoto.getData() : null,
         isOutlier: false
       });
 

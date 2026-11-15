@@ -153,9 +153,8 @@
             <button id="photo-take" type="button" data-i18n="Take photo">Take photo</button>
             <button id="photo-pick" type="button" data-i18n="Choose photo">Choose photo</button>
           </div>
-          <!-- input ไฟล์ซ่อนไว้ แล้วให้ปุ่มด้านบนสั่งเปิดแทน
-               capture="environment" = บนมือถือเปิดกล้องหลังทันที -->
-          <input id="photo-camera"  type="file" accept="image/*" capture="environment" hidden>
+          <!-- capture requests the rear camera on mobile browsers that support it. -->
+          <input id="photo-camera" type="file" accept="image/*" capture="environment" hidden>
           <input id="photo-gallery" type="file" accept="image/*" hidden>
 
           <img id="photo-preview" class="photo-preview" alt="Preview of the bowl photo" data-i18n-alt="Preview of the bowl photo" hidden>
