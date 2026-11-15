@@ -180,8 +180,22 @@ const I18n = (() => {
   let language = localStorage.getItem(LANGUAGE_KEY) === 'en' ? 'en' : 'th';
   const dynamicText = new WeakMap();
 
+  // เก็บข้อความต้นฉบับไว้เป็น Backup
+  const originalTexts = {};
+
   function t(text, values = {}) {
-    let translated = translations[language]?.[text] || text;
+    // ถ้ามีคำแปลใน Dictionary ให้ใช้คำแปลนั้น
+    let translated = translations[language]?.[text];
+    
+    if (!translated) {
+        // กรณีไม่มีคำแปล (เช่น เป็นภาษาอังกฤษและไม่ได้ตั้งค่าไว้) ให้เช็กว่ามีต้นฉบับไหม
+        const el = document.querySelector(`[data-i18n="${text}"]`);
+        if (el && !originalTexts[text]) {
+            originalTexts[text] = el.innerHTML; // บันทึกต้นฉบับภาษาอังกฤษไว้ในหน่วยความจำ
+        }
+        translated = originalTexts[text] || text;
+    }
+
     Object.entries(values).forEach(([key, value]) => {
       translated = translated.replaceAll('{' + key + '}', value);
     });
