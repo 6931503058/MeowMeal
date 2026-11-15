@@ -1,4 +1,4 @@
-# MeowMeal — AI Use Log
+# MeowMeal — AI Usage Log
 
 ## Project information
 
