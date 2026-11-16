@@ -45,9 +45,8 @@ JavaScript, CSS, HTML
 
 ## Running Tests
 
-```bash
-git clone https://github.com/6931503058/MeowMeal.git
-cd MeowMeal http://172.25.82.47:8000/#log
+```
+6931503058.github.io/MeowMeal/team-project/prototype/
 ```
 Then open `index.html` in a browser. No installation needed.
 Click **Sample data** to see the alert and chart immediately.
